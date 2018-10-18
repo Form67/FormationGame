@@ -37,10 +37,10 @@ public class Emergent : MonoBehaviour {
             var minLayer = int.MaxValue;
             var f = this.gameObject;
             foreach (GameObject g in allBoids) {
-                if (g != this.gameObject && g.GetComponent<Emergent>().depth < minLayer && PositionOpen(g) )
+                if (g != this.gameObject && g.GetComponent<Emergent>().depth < minLayer && PositionOpen(g))
                 {
                     minLayer = g.GetComponent<Emergent>().depth;
-                    print(minLayer);
+                   
                     f = g;
                 }
 
@@ -115,7 +115,18 @@ public class Emergent : MonoBehaviour {
 
     }
     bool PositionOpen(GameObject g) {
-        if (g.GetComponent<Emergent>().backLeft == null || g.GetComponent<Emergent>().backRight == null) {
+        if (g.GetComponent<Emergent>().isLeft) {
+            if (g.GetComponent<Emergent>().backLeft == null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+
+            }
+        }
+        else if (g.GetComponent<Emergent>().backLeft == null || g.GetComponent<Emergent>().backRight == null) {
             return true;
         }
         return false;
