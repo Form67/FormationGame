@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class Emergent : MonoBehaviour {
     public int amountFollowing;
+    public int depth;
     public GameObject forwardUnit;
     public GameObject backLeft;
     public GameObject backRight;
+    public Rigidbody2D rb;
     public bool canFollow;
     public bool destructable;
     public bool isLeft;
@@ -14,34 +16,46 @@ public class Emergent : MonoBehaviour {
     public float seperationDistance;
     public float seperationAngle;
     public Vector2 destination;
-	// Use this for initialization
-	void Start () {
+
+    public float maxAcceleration;
+    public float maxVelocity;
+    public float slowRadius;
+    public float timeToTarget;
+
+    // Use this for initialization
+    void Start () {
         allBoids = GameObject.FindGameObjectsWithTag("boid");
+        rb = this.GetComponent<Rigidbody2D>();
+        if (canFollow) {
+            depth = int.MaxValue;
+        }
 	}
 	
 	// Update is called once per frame
 	void Update () {
         if (canFollow&& forwardUnit == null) {
+            var minLayer = int.MaxValue;
+            var f = this.gameObject;
             foreach (GameObject g in allBoids) {
-                if (g != this.gameObject)
+                if (g != this.gameObject && g.GetComponent<Emergent>().depth < minLayer && PositionOpen(g) )
                 {
-                    int t = g.GetComponent<Emergent>().RequestEntry(this.gameObject);
-                    if (t == 0)
-                    {
-                        continue;
-                    }
-                    else if (t == 1)
-                    {
-                        this.forwardUnit = g;
-                        isLeft = true;
-                        break;
-                    }
-                    else {
-                        this.forwardUnit = g;
-                        isLeft = false;
-                        break;
-                    }
+                    minLayer = g.GetComponent<Emergent>().depth;
+                    print(minLayer);
+                    f = g;
                 }
+
+            }
+            int t = f.GetComponent<Emergent>().RequestEntry(this.gameObject);
+            this.depth = f.GetComponent<Emergent>().depth + 1;
+            if (t == 1)
+            {
+                this.forwardUnit = f;
+                isLeft = true;
+            }
+            else
+            {
+                this.forwardUnit = f;
+                isLeft = false;
             }
         }
         if (forwardUnit != null && canFollow)
@@ -54,7 +68,23 @@ public class Emergent : MonoBehaviour {
             else {
                 tempVect = forwardUnit.transform.right * seperationAngle;
             }
-            destination = forwardUnit.transform.position - forwardUnit.transform.forward *seperationDistance + tempVect;
+            destination = forwardUnit.transform.position - forwardUnit.transform.up *seperationDistance + tempVect;
+            
+            Vector2 formationAccelerationSeek = DynamicSeek(transform.position, destination);
+            Vector2 formationAccelerationArrive = DynamicArrive(this.transform.position, destination, rb.velocity);
+            Vector2 acceleration = formationAccelerationSeek + formationAccelerationArrive;
+            if (acceleration.magnitude > maxAcceleration)
+            {
+                acceleration = acceleration.normalized * maxAcceleration;
+            }
+
+            rb.velocity += acceleration;
+
+            if (rb.velocity.magnitude > maxVelocity)
+            {
+                rb.velocity = rb.velocity.normalized * maxVelocity;
+            }
+            transform.rotation = forwardUnit.transform.rotation;
         }
         else if (!canFollow)
         {
@@ -78,5 +108,25 @@ public class Emergent : MonoBehaviour {
         }
         else return 0;
     }
+    Vector2 DynamicSeek(Vector3 position, Vector3 target)
+    {
+        Vector2 linearAcc = target - position;
+        return maxAcceleration * linearAcc;
 
+    }
+    bool PositionOpen(GameObject g) {
+        if (g.GetComponent<Emergent>().backLeft == null || g.GetComponent<Emergent>().backRight == null) {
+            return true;
+        }
+        return false;
+    }
+    Vector2 DynamicArrive(Vector3 position, Vector3 target, Vector2 currentVelocity)
+    {
+        Vector2 SeekAcceleration = DynamicSeek(position, target);
+        float targetSpeed = maxVelocity * (Vector3.Distance(position, target) / slowRadius);
+        Vector2 directionVector = (target - position).normalized;
+        Vector2 targetVelocity = directionVector * targetSpeed;
+        Vector2 acceleration = (targetVelocity - currentVelocity) / timeToTarget;
+        return maxAcceleration * acceleration;
+    }
 }
