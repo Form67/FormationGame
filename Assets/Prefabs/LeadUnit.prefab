@@ -20,12 +20,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4419822336567246}
   - component: {fileID: 212886694210164804}
-  - component: {fileID: 50871575039730258}
-  - component: {fileID: 58703063149267798}
-  - component: {fileID: 114609933499784844}
   m_Layer: 0
   m_Name: LeadUnit
-  m_TagString: boid
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -43,84 +40,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!50 &50871575039730258
-Rigidbody2D:
-  serializedVersion: 4
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1744886431916946}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDrag: 0
-  m_AngularDrag: 0.05
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
---- !u!58 &58703063149267798
-CircleCollider2D:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1744886431916946}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -0.45905882}
-  serializedVersion: 2
-  m_Radius: 0.7253357
---- !u!114 &114609933499784844
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1744886431916946}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62af805faff9869448a18ee406e62dfa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  path:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  arrived: 0
-  closeEnoughDistance: 5
-  currentIndex: 0
-  amountFollowing: 0
-  depth: 0
-  fractionOfLineLookAhead: 0
-  forwardUnit: {fileID: 0}
-  backLeft: {fileID: 0}
-  backRight: {fileID: 0}
-  rb: {fileID: 0}
-  canFollow: 0
-  destructable: 0
-  isLeft: 0
-  allBoids: []
-  seperationDistance: 0.7
-  seperationAngle: 0.5
-  destination: {x: 0, y: 0}
-  maxAcceleration: 0.1
-  maxVelocity: 1.2
-  slowRadius: 5
-  timeToTarget: 1
 --- !u!212 &212886694210164804
 SpriteRenderer:
   m_ObjectHideFlags: 1
