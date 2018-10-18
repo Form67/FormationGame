@@ -52,8 +52,9 @@ public class FormationScript : MonoBehaviour {
 		for (int i = 0; i < startingNumberOfUnits - 1; i++) {
 			Vector3 position = unitsInFormation [i].transform.position;
 			Rigidbody2D rb = unitsInFormation [i].GetComponent<Rigidbody2D> ();
-			Vector3 target = centerVector + currentRadius * new Vector3 (-Mathf.Sin ((leadRotation + angleDivision * (i + 1)) * Mathf.Deg2Rad), 
-				Mathf.Cos ((leadRotation + angleDivision * (i + 1)) * Mathf.Deg2Rad));
+			Vector3 directionFromRadiusVector = new Vector3 (-Mathf.Sin ((leadRotation + angleDivision * (i + 1)) * Mathf.Deg2Rad), 
+				                                    Mathf.Cos ((leadRotation + angleDivision * (i + 1)) * Mathf.Deg2Rad));
+			Vector3 target = centerVector + currentRadius * directionFromRadiusVector;
 			Vector2 formationAccelerationSeek = formationWeightSeek * DynamicSeek (position, target);
 			Vector2 formationAccelerationArrive = formationWeightArrive * DynamicArrive (position, target, rb.velocity);
 			Vector2 acceleration= formationAccelerationSeek + formationAccelerationArrive;
@@ -66,6 +67,8 @@ public class FormationScript : MonoBehaviour {
 			if (rb.velocity.magnitude > maxVelocity) {
 				rb.velocity = rb.velocity.normalized * maxVelocity;
 			}
+			float unitRotation = Mathf.Atan2 (-directionFromRadiusVector.x, directionFromRadiusVector.y);
+			unitsInFormation [i].transform.eulerAngles = new Vector3 (0, 0, unitRotation * Mathf.Rad2Deg);
 		}
 			
 	}
