@@ -142,15 +142,19 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4419822336567246, guid: 0da271b4e47d36645a2525af41320184, type: 2}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: 0.7074152
       objectReference: {fileID: 0}
     - target: {fileID: 4419822336567246, guid: 0da271b4e47d36645a2525af41320184, type: 2}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.70679826
       objectReference: {fileID: 0}
     - target: {fileID: 4419822336567246, guid: 0da271b4e47d36645a2525af41320184, type: 2}
       propertyPath: m_RootOrder
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4419822336567246, guid: 0da271b4e47d36645a2525af41320184, type: 2}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 90.05
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0da271b4e47d36645a2525af41320184, type: 2}
@@ -171,7 +175,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2e59c732f59b97499246ffa0de8a52a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startRadius: 0.5
+  startRadius: 1.6
   startingNumberOfUnits: 12
   unitPrefab: {fileID: 1357473648025130, guid: 3d33f4589c8226d4aba70915807ae8ee, type: 2}
   maxAcceleration: 1
