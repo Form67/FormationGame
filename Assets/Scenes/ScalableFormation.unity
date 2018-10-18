@@ -122,11 +122,11 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4419822336567246, guid: 0da271b4e47d36645a2525af41320184, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 3.67
       objectReference: {fileID: 0}
     - target: {fileID: 4419822336567246, guid: 0da271b4e47d36645a2525af41320184, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -2.98
       objectReference: {fileID: 0}
     - target: {fileID: 4419822336567246, guid: 0da271b4e47d36645a2525af41320184, type: 2}
       propertyPath: m_LocalPosition.z
@@ -172,11 +172,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startRadius: 0.5
-  startingNumberOfUnits: 11
+  startingNumberOfUnits: 12
   unitPrefab: {fileID: 1357473648025130, guid: 3d33f4589c8226d4aba70915807ae8ee, type: 2}
   maxAcceleration: 1
   maxVelocity: 1
-  formationWeight: 1
+  slowRadius: 0
+  timeToTarget: 0
+  formationWeightSeek: 0
+  formationWeightArrive: 0
+--- !u!50 &287558508
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 287558506}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1001 &980462115
 Prefab:
   m_ObjectHideFlags: 0

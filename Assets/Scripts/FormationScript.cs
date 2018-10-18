@@ -9,8 +9,11 @@ public class FormationScript : MonoBehaviour {
 
 	public float maxAcceleration;
 	public float maxVelocity;
+	public float slowRadius;
+	public float timeToTarget;
 
-	public float formationWeight;
+	public float formationWeightSeek;
+	public float formationWeightArrive;
 	float currentRadius;
 	int currentNumberOfUnits;
 	
@@ -51,9 +54,9 @@ public class FormationScript : MonoBehaviour {
 			Rigidbody2D rb = unitsInFormation [i].GetComponent<Rigidbody2D> ();
 			Vector3 target = centerVector + new Vector3 (Mathf.Sin ((leadRotation + angleDivision * (i + 1)) * Mathf.Deg2Rad), 
 				Mathf.Cos ((leadRotation + angleDivision * (i + 1)) * Mathf.Deg2Rad));
-			Vector2 formationAcceleration = formationWeight * DynamicSeek (position, target);
-
-			Vector2 acceleration= formationAcceleration;
+			Vector2 formationAccelerationSeek = formationWeightSeek * DynamicSeek (position, target);
+			Vector2 formationAccelerationArrive = formationWeightArrive * DynamicArrive (position, target, rb.velocity);
+			Vector2 acceleration= formationAccelerationSeek + formationAccelerationArrive;
 			if (acceleration.magnitude > maxAcceleration) {
 				acceleration = acceleration.normalized * maxAcceleration;
 			}
@@ -67,11 +70,19 @@ public class FormationScript : MonoBehaviour {
 			
 	}
 
-	Vector2 DynamicSeek(Vector3 position, Vector3 target)
-	{
+	Vector2 DynamicSeek(Vector3 position, Vector3 target){
 		Vector2 linearAcc = target - position;
 		return maxAcceleration * linearAcc;
 
+	}
+
+	Vector2 DynamicArrive(Vector3 position, Vector3 target, Vector2 currentVelocity){
+		Vector2 SeekAcceleration = DynamicSeek (position, target);
+		float targetSpeed = maxVelocity * (Vector3.Distance (position, target) / slowRadius);
+		Vector2 directionVector = (target - position).normalized;
+		Vector2 targetVelocity = directionVector * targetSpeed;
+		Vector2 acceleration = (targetVelocity - currentVelocity) / timeToTarget;
+		return maxAcceleration * acceleration;
 	}
 
 }
