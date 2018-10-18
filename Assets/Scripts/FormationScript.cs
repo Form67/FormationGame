@@ -14,6 +14,8 @@ public class FormationScript : MonoBehaviour {
 
 	public float formationWeightSeek;
 	public float formationWeightArrive;
+    public float characterRadius = 0.45f;
+
 	float currentRadius;
 	int currentNumberOfUnits;
 	
@@ -42,10 +44,10 @@ public class FormationScript : MonoBehaviour {
 				currentNumberOfUnits--;
 			}
 		}
-		currentRadius = (currentNumberOfUnits * startRadius) / startingNumberOfUnits;
+		currentRadius = characterRadius / Mathf.Sin(Mathf.PI / startingNumberOfUnits);
 		float angleDivision = 360.0f / (currentNumberOfUnits);
 
-		float leadRotation = transform.eulerAngles.z;
+        float leadRotation = transform.eulerAngles.z;
 
 		Vector3 centerVector = (-currentRadius)  * new Vector3 (-Mathf.Sin (leadRotation * Mathf.Deg2Rad), 
 			Mathf.Cos (leadRotation * Mathf.Deg2Rad), 0) + transform.position;
