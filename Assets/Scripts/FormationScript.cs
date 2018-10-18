@@ -80,7 +80,7 @@ public class FormationScript : MonoBehaviour {
 	}
 
 	Vector2 DynamicArrive(Vector3 position, Vector3 target, Vector2 currentVelocity){
-		Vector2 SeekAcceleration = DynamicSeek (position, target);
+		
 		float targetSpeed = maxVelocity * (Vector3.Distance (position, target) / slowRadius);
 		Vector2 directionVector = (target - position).normalized;
 		Vector2 targetVelocity = directionVector * targetSpeed;
