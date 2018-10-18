@@ -113,6 +113,48 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &114321270
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4710045698943684, guid: db36baedbe3d7f846ae7a83e4a63af4f, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 1.51
+      objectReference: {fileID: 0}
+    - target: {fileID: 4710045698943684, guid: db36baedbe3d7f846ae7a83e4a63af4f, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 1.61
+      objectReference: {fileID: 0}
+    - target: {fileID: 4710045698943684, guid: db36baedbe3d7f846ae7a83e4a63af4f, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: -0.12737618
+      objectReference: {fileID: 0}
+    - target: {fileID: 4710045698943684, guid: db36baedbe3d7f846ae7a83e4a63af4f, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4710045698943684, guid: db36baedbe3d7f846ae7a83e4a63af4f, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4710045698943684, guid: db36baedbe3d7f846ae7a83e4a63af4f, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4710045698943684, guid: db36baedbe3d7f846ae7a83e4a63af4f, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4710045698943684, guid: db36baedbe3d7f846ae7a83e4a63af4f, type: 2}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: db36baedbe3d7f846ae7a83e4a63af4f, type: 2}
+  m_IsPrefabAsset: 0
 --- !u!1 &1402536802
 GameObject:
   m_ObjectHideFlags: 0
@@ -146,7 +188,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 1, g: 1, b: 1, a: 0}
+  m_BackGroundColor: {r: 0.1509434, g: 0.1509434, b: 0.1509434, a: 0}
   m_projectionMatrixMode: 1
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
@@ -227,7 +269,11 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4325944049155686, guid: 1a69e00c90f1a0d4b8d840207d6cc003, type: 2}
       propertyPath: m_RootOrder
-      value: 1
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1625875213435780, guid: 1a69e00c90f1a0d4b8d840207d6cc003, type: 2}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1a69e00c90f1a0d4b8d840207d6cc003, type: 2}
