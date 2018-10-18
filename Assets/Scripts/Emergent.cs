@@ -3,8 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Emergent : MonoBehaviour {
+    public GameObject[] path;
+    public bool arrived;
+    public float closeEnoughDistance;
+    public int currentIndex;
     public int amountFollowing;
     public int depth;
+    public float fractionOfLineLookAhead;
     public GameObject forwardUnit;
     public GameObject backLeft;
     public GameObject backRight;
@@ -16,7 +21,7 @@ public class Emergent : MonoBehaviour {
     public float seperationDistance;
     public float seperationAngle;
     public Vector2 destination;
-
+    GameObject[] walls;
     public float maxAcceleration;
     public float maxVelocity;
     public float slowRadius;
@@ -29,18 +34,27 @@ public class Emergent : MonoBehaviour {
         if (canFollow) {
             depth = int.MaxValue;
         }
+        walls = GameObject.FindGameObjectsWithTag("Wall");
 	}
-	
-	// Update is called once per frame
-	void Update () {
-        if (canFollow&& forwardUnit == null) {
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (canFollow && forwardUnit == null)
+        {
+            allBoids = GameObject.FindGameObjectsWithTag("boid");
+            if (canFollow)
+            {
+                depth = int.MaxValue;
+            }
             var minLayer = int.MaxValue;
             var f = this.gameObject;
-            foreach (GameObject g in allBoids) {
-                if (g != this.gameObject && g.GetComponent<Emergent>().depth < minLayer && PositionOpen(g))
+            foreach (GameObject g in allBoids)
+            {
+                if (g != this.gameObject && g.GetComponent<Emergent>().depth < minLayer && PositionOpen(g) && g.gameObject != backLeft && g.gameObject != backRight)
                 {
                     minLayer = g.GetComponent<Emergent>().depth;
-                   
+
                     f = g;
                 }
 
@@ -63,16 +77,17 @@ public class Emergent : MonoBehaviour {
             var tempVect = new Vector3();
             if (isLeft)
             {
-                tempVect = -forwardUnit.transform.right*seperationAngle;
+                tempVect = -forwardUnit.transform.right * seperationAngle;
             }
-            else {
+            else
+            {
                 tempVect = forwardUnit.transform.right * seperationAngle;
             }
-            destination = forwardUnit.transform.position - forwardUnit.transform.up *seperationDistance + tempVect;
-            
+            destination = forwardUnit.transform.position - forwardUnit.transform.up * seperationDistance + tempVect;
+
             Vector2 formationAccelerationSeek = DynamicSeek(transform.position, destination);
             Vector2 formationAccelerationArrive = DynamicArrive(this.transform.position, destination, rb.velocity);
-            Vector2 acceleration = formationAccelerationSeek + formationAccelerationArrive;
+            Vector2 acceleration = formationAccelerationSeek + formationAccelerationArrive + coneCheck(this.gameObject)*.6f ;
             if (acceleration.magnitude > maxAcceleration)
             {
                 acceleration = acceleration.normalized * maxAcceleration;
@@ -88,10 +103,85 @@ public class Emergent : MonoBehaviour {
         }
         else if (!canFollow)
         {
-            //pathfind
-        }
-	}
+            float zRotation = Mathf.Atan2(-GetComponent<Rigidbody2D>().velocity.x, GetComponent<Rigidbody2D>().velocity.y);
+            transform.eulerAngles = new Vector3(0, 0, Mathf.Rad2Deg * zRotation);
+            if (Vector3.Distance(this.transform.position, path[currentIndex].transform.position) < .5f)
+            {
+                if (currentIndex < path.Length - 1)
+                {
+                    currentIndex++;
+                    // transform.up = path[currentIndex].transform.position - transform.position;
+                }
+                else
+                {
+                    arrived = true;
+                    rb.velocity = new Vector2(0, 0);
+                }
+            }
+            Vector2 formationAccelerationSeek = Pathfind();
+            Vector2 formationAccelerationArrive = DynamicArrive(this.transform.position, path[currentIndex].transform.position, rb.velocity);
+            Vector2 acceleration = formationAccelerationSeek + formationAccelerationArrive + coneCheck(this.gameObject)*.2f;
+            if (acceleration.magnitude > maxAcceleration)
+            {
+                acceleration = acceleration.normalized * maxAcceleration;
+            }
+            rb.velocity += acceleration;
 
+            if (rb.velocity.magnitude > maxVelocity)
+            {
+                rb.velocity = rb.velocity.normalized * maxVelocity;
+            }
+        }
+    }
+
+   public Vector2 coneCheck(GameObject b)
+    {
+        GameObject smallestDistance = null;
+        float smallestDistanceAmount = 10000;
+        Vector2 ourVelocity = b.GetComponent<Rigidbody2D>().velocity;
+        foreach (GameObject g in walls)
+        {
+            if (g != b)
+            {
+                if (Vector3.Distance(g.transform.position, b.transform.position) < closeEnoughDistance)
+                {
+                    if (Vector3.Angle(g.transform.position, b.transform.position) < 90)
+                    {
+                        if (Vector3.Distance(g.transform.position, b.transform.position) < smallestDistanceAmount)
+                        {
+                            smallestDistance = g;
+                            smallestDistanceAmount = Vector3.Distance(g.transform.position, b.transform.position);
+                          //Vector2 theirVelocity = g.GetComponent<Rigidbody2D>().velocity;
+                        }
+                    }
+                }
+            }
+
+        }
+        if (smallestDistance != null)
+        {
+
+            Vector3 ourVelocity3D = ourVelocity;
+            Vector3 predictedPosition = b.transform.position + smallestDistanceAmount * ourVelocity3D;
+            // Vector3 theirVelocity3D = smallestDistance.GetComponent<Rigidbody2D>().velocity;
+            Vector3 targetPredictedPosition = smallestDistance.transform.position; //smallestDistanceAmount * theirVelocity3D;
+            //print(DynamicEvade(predictedPosition, targetPredictedPosition));
+            return DynamicEvade(predictedPosition, targetPredictedPosition);
+        }
+        return Vector2.zero;
+    }
+
+Vector2 DynamicEvade(Vector3 position, Vector3 target)
+{
+    Vector2 linearAcc = position - target;
+
+    return maxAcceleration * linearAcc.normalized;
+}
+
+public Vector2 Pathfind()
+    {
+            return DynamicSeek(transform.position, path[currentIndex].transform.position);
+    }
     public int RequestEntry(GameObject g) {
 
         if (this.backLeft == null)
