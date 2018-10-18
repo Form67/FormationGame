@@ -47,12 +47,12 @@ public class FormationScript : MonoBehaviour {
 
 		float leadRotation = transform.eulerAngles.z;
 
-		Vector3 centerVector = (-currentRadius)  * new Vector3 (Mathf.Sin (leadRotation * Mathf.Deg2Rad), 
+		Vector3 centerVector = (-currentRadius)  * new Vector3 (-Mathf.Sin (leadRotation * Mathf.Deg2Rad), 
 			Mathf.Cos (leadRotation * Mathf.Deg2Rad), 0) + transform.position;
 		for (int i = 0; i < startingNumberOfUnits - 1; i++) {
 			Vector3 position = unitsInFormation [i].transform.position;
 			Rigidbody2D rb = unitsInFormation [i].GetComponent<Rigidbody2D> ();
-			Vector3 target = centerVector + new Vector3 (Mathf.Sin ((leadRotation + angleDivision * (i + 1)) * Mathf.Deg2Rad), 
+			Vector3 target = centerVector + currentRadius * new Vector3 (-Mathf.Sin ((leadRotation + angleDivision * (i + 1)) * Mathf.Deg2Rad), 
 				Mathf.Cos ((leadRotation + angleDivision * (i + 1)) * Mathf.Deg2Rad));
 			Vector2 formationAccelerationSeek = formationWeightSeek * DynamicSeek (position, target);
 			Vector2 formationAccelerationArrive = formationWeightArrive * DynamicArrive (position, target, rb.velocity);
