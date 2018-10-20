@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-struct SlotAssignment{
+public struct SlotAssignment{
 	public GameObject character;
 	public int slotNumber;
 
 }
 
 
-struct PositionOrientation{
+public struct PositionOrientation{
 	public Vector3 position;
 	public Vector3 orientation;
 
@@ -25,7 +25,7 @@ public class FormationPattern {
 		numberOfSlots = nOS;
 	}
 
-	PositionOrientation getDriftOffset(List<SlotAssignment> slots){
+	public PositionOrientation getDriftOffset(List<SlotAssignment> slots){
 		PositionOrientation center = new PositionOrientation ();
 
 
@@ -41,7 +41,7 @@ public class FormationPattern {
 		return center;
 	}
 
-	PositionOrientation getSlotLocation(int slotNumber){
+	public PositionOrientation getSlotLocation(int slotNumber){
 		float angleAroundCircle = (slotNumber / (float) numberOfSlots) * 2f * Mathf.PI;
 		float radius = characterRadius / Mathf.Sin (Mathf.PI / numberOfSlots);
 
@@ -58,6 +58,19 @@ public class Level2FormationSteering : MonoBehaviour {
 	public int numberOfSlots;
 	public float characterRadius;
 	public GameObject unitPrefab;
+	public float anchorOffset;
+	public float timeToTarget;
+	public float slowRadius;
+
+
+	public float coneCheckRadius;
+
+	public float leadUnitMaxVelocity;
+	public float leadUnitMaxAcceleration;
+
+	public float formationUnitMaxVelocity;
+	public float formationUnitMaxAcceleration;
+
 	FormationPattern pattern;
 	List<SlotAssignment> slotAssignments;
 
@@ -72,14 +85,67 @@ public class Level2FormationSteering : MonoBehaviour {
 			slot.character = Instantiate (unitPrefab);
 			slotAssignments.Add (slot);
 		}
+		centerOfMass = pattern.getDriftOffset (slotAssignments);
+
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		
+		Vector2 averageVelocity = Vector2.zero;
+		foreach (SlotAssignment slot in slotAssignments) {
+			Rigidbody2D rb = slot.character.GetComponent<Rigidbody2D> ();
+
+			Vector3 position = slot.character.transform.position;
+			Vector3 target = pattern.getSlotLocation (slot.slotNumber).position + centerOfMass.position;
+			Vector2 formationSeekAcceleration = DynamicSeek (position, target, formationUnitMaxAcceleration);
+			Vector2 formationArriveAcceleration = DynamicArrive (position, target, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
+
+			target = transform.position;
+
+			Vector2 targetSeekAcceleration = DynamicSeek (position, target, formationUnitMaxAcceleration);
+			Vector2 targetArriveAcceleration = DynamicArrive (position, target, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
+
+			Collider2D[] colliders = Physics2D.OverlapCircleAll(position, coneCheckRadius);
+
+
+			Vector2 acceleration = formationSeekAcceleration + formationArriveAcceleration + targetSeekAcceleration + targetArriveAcceleration;
+
+			if (acceleration.magnitude > formationUnitMaxAcceleration) {
+				acceleration = formationUnitMaxAcceleration * acceleration.normalized;
+			}
+
+			rb.velocity += acceleration;
+
+			if (rb.velocity.magnitude > formationUnitMaxVelocity) {
+				rb.velocity = formationUnitMaxVelocity * rb.velocity.normalized;
+			}
+
+
+
+			averageVelocity += rb.velocity;
+
+		}
+		averageVelocity *= 1f / (float)slotAssignments.Count;
+
 	}
 
-	void updateSlotAssignments(){
+	Vector2 DynamicSeek(Vector3 position, Vector3 target, float maxAcceleration){
+		Vector2 linearAcc = target - position;
+		return maxAcceleration * linearAcc;
+
+	}
+
+	Vector2 DynamicArrive(Vector3 position, Vector3 target, Vector2 currentVelocity, float maxVelocity, float maxAcceleration){
+
+		float targetSpeed = maxVelocity * (Vector3.Distance (position, target) / slowRadius);
+		Vector2 directionVector = (target - position).normalized;
+		Vector2 targetVelocity = directionVector * targetSpeed;
+		Vector2 acceleration = (targetVelocity - currentVelocity) / timeToTarget;
+		return maxAcceleration * acceleration;
+	}
+
+	Vector2 ConeCheck(Vector3 position, Vector3 orientation){
+        return Vector2.zero;
 	}
 
 
