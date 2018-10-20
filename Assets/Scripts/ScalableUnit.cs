@@ -7,6 +7,8 @@ public class ScalableUnit : Movement
     [Header("Formation")]
     public float formationWeightSeek;
     public float formationWeightArrive;
+    public float formationAcceptanceRange;
+
 
     ScalableManager manager;
     Rigidbody2D rb;
@@ -52,6 +54,7 @@ public class ScalableUnit : Movement
         // Adjust orientation
         float unitRotation = Mathf.Atan2(-directionFromRadiusVector.x, directionFromRadiusVector.y);
         transform.eulerAngles = new Vector3(0, 0, unitRotation * Mathf.Rad2Deg);
+        
     }
 
     public void DestroySelf()

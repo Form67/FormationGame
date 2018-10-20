@@ -21,9 +21,12 @@ public class ScalableManager : MonoBehaviour {
     void Awake () {
         // Instantiate our list of units
         unitsInFormation = new List<GameObject>();
-        for (int i = 0; i < startingNumberOfUnits - 1; i++)
+        int xOffset = 0;
+        for (int i = 0; i < startingNumberOfUnits; i++)
         {
-            unitsInFormation.Add(Instantiate(unitPrefab));
+            Vector3 instantiatePos = new Vector3(transform.position.x + xOffset, transform.position.y, 0);
+            unitsInFormation.Add(Instantiate(unitPrefab, instantiatePos, Quaternion.identity));
+            xOffset += 2;
         }
 
         currentRadius = startRadius;
@@ -31,7 +34,6 @@ public class ScalableManager : MonoBehaviour {
 
         // Set the first leader unit
         AssignLeader();
-
     }
 	
 	// Update is called once per frame
@@ -84,9 +86,8 @@ public class ScalableManager : MonoBehaviour {
         if (unitsInFormation.Count > 0)
         {
             leader = unitsInFormation[0];
-            unitsInFormation.RemoveAt(0);
             leader.GetComponent<SpriteRenderer>().color = leaderColor;
-            currentNumberOfUnits--;
+            unitsInFormation.RemoveAt(0);
         }
         else
             enabled = false; // no more units left -> do nothing

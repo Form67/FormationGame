@@ -21,8 +21,8 @@ GameObject:
   - component: {fileID: 4775898329391306}
   - component: {fileID: 212988362492715790}
   - component: {fileID: 50730302143239234}
-  - component: {fileID: 114792958343835760}
   - component: {fileID: 58931939420358524}
+  - component: {fileID: 114792958343835760}
   m_Layer: 0
   m_Name: ScalableUnit
   m_TagString: boid
@@ -62,7 +62,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 4
+  m_Constraints: 0
 --- !u!58 &58931939420358524
 CircleCollider2D:
   m_ObjectHideFlags: 1
@@ -95,6 +95,7 @@ MonoBehaviour:
   timeToTarget: 0.28
   formationWeightSeek: 0.6
   formationWeightArrive: 0.4
+  formationAcceptanceRange: 0
 --- !u!212 &212988362492715790
 SpriteRenderer:
   m_ObjectHideFlags: 1
