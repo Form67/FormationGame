@@ -145,7 +145,7 @@ public class Level2FormationSteering : MonoBehaviour {
 	}
 
 	Vector2 ConeCheck(Vector3 position, Vector3 orientation){
-		
+        return Vector2.zero;
 	}
 
 
