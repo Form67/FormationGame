@@ -8,15 +8,21 @@ public class ScalableUnit : Movement
     public float formationWeightSeek;
     public float formationWeightArrive;
 
+    ScalableManager manager;
     Rigidbody2D rb;
 
     // Use this for initialization
     void Awake () {
         rb = GetComponent<Rigidbody2D>();
 	}
-	
-	// Update is called once per frame
-	void Update () {
+
+    void Start()
+    {
+        manager = FindObjectOfType<ScalableManager>();
+    }
+
+    // Update is called once per frame
+    void Update () {
 
 		
 	}
@@ -46,5 +52,11 @@ public class ScalableUnit : Movement
         // Adjust orientation
         float unitRotation = Mathf.Atan2(-directionFromRadiusVector.x, directionFromRadiusVector.y);
         transform.eulerAngles = new Vector3(0, 0, unitRotation * Mathf.Rad2Deg);
+    }
+
+    public void DestroySelf()
+    {
+        manager.RemoveBoid(gameObject);
+        Destroy(gameObject);
     }
 }
