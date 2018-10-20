@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Unit : Movement
+public class ScalableUnit : Movement
 {
     [Header("Formation")]
     public float formationWeightSeek;

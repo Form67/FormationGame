@@ -55,7 +55,7 @@ public class ScalableManager : MonoBehaviour {
                                                     Mathf.Cos((leadRotation + angleDivision * (i + 1)) * Mathf.Deg2Rad));
 
             Vector3 target = centerVector + currentRadius * directionFromRadiusVector;
-            unitsInFormation[i].GetComponent<Unit>().SetTarget(target, directionFromRadiusVector);
+            unitsInFormation[i].GetComponent<ScalableUnit>().SetTarget(target, directionFromRadiusVector);
         }
     }
 
