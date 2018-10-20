@@ -21,12 +21,13 @@ public class ScalableManager : MonoBehaviour {
     void Awake () {
         // Instantiate our list of units
         unitsInFormation = new List<GameObject>();
-        int xOffset = 0;
+        //int xOffset = 0;
         for (int i = 0; i < startingNumberOfUnits; i++)
         {
-            Vector3 instantiatePos = new Vector3(transform.position.x + xOffset, transform.position.y, 0);
-            unitsInFormation.Add(Instantiate(unitPrefab, instantiatePos, Quaternion.identity));
-            xOffset += 2;
+            //Vector3 instantiatePos = new Vector3(transform.position.x + xOffset, transform.position.y, 0);
+            //unitsInFormation.Add(Instantiate(unitPrefab, instantiatePos, Quaternion.identity));
+            //xOffset += 2;
+            unitsInFormation.Add(Instantiate(unitPrefab));
         }
 
         currentRadius = startRadius;
