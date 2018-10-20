@@ -230,4 +230,7 @@ public Vector2 Pathfind()
         Vector2 acceleration = (targetVelocity - currentVelocity) / timeToTarget;
         return maxAcceleration * acceleration;
     }
+    public void MoveThroughTunnel(GameObject tunnelExit) {
+        DynamicSeek(this.transform.position, tunnelExit.transform.position);
+    }
 }
