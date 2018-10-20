@@ -62,6 +62,7 @@ public class Level2FormationSteering : MonoBehaviour {
 	public float timeToTarget;
 	public float slowRadius;
 
+	public GameObject[] path;
 
 	public float coneCheckRadius;
 
@@ -74,8 +75,13 @@ public class Level2FormationSteering : MonoBehaviour {
 	FormationPattern pattern;
 	List<SlotAssignment> slotAssignments;
 
-	PositionOrientation centerOfMass;
+	PositionOrientation anchorPoint;
 
+	public float offsetConstant;
+
+	int currentIndex;
+	bool completed;
+	Rigidbody2D rbody;
 	// Use this for initialization
 	void Start () {
 		pattern = new FormationPattern (characterRadius, numberOfSlots);
@@ -85,8 +91,10 @@ public class Level2FormationSteering : MonoBehaviour {
 			slot.character = Instantiate (unitPrefab);
 			slotAssignments.Add (slot);
 		}
-		centerOfMass = pattern.getDriftOffset (slotAssignments);
-
+		anchorPoint = pattern.getDriftOffset (slotAssignments);
+		currentIndex = 0;
+		rbody = GetComponent<Rigidbody2D> ();
+		completed = false;
 	}
 	
 	// Update is called once per frame
@@ -96,7 +104,7 @@ public class Level2FormationSteering : MonoBehaviour {
 			Rigidbody2D rb = slot.character.GetComponent<Rigidbody2D> ();
 
 			Vector3 position = slot.character.transform.position;
-			Vector3 target = pattern.getSlotLocation (slot.slotNumber).position + centerOfMass.position;
+			Vector3 target = pattern.getSlotLocation (slot.slotNumber).position + anchorPoint.position;
 			Vector2 formationSeekAcceleration = DynamicSeek (position, target, formationUnitMaxAcceleration);
 			Vector2 formationArriveAcceleration = DynamicArrive (position, target, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
 
@@ -105,10 +113,10 @@ public class Level2FormationSteering : MonoBehaviour {
 			Vector2 targetSeekAcceleration = DynamicSeek (position, target, formationUnitMaxAcceleration);
 			Vector2 targetArriveAcceleration = DynamicArrive (position, target, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
 
-			Collider2D[] colliders = Physics2D.OverlapCircleAll(position, coneCheckRadius);
+			Vector2 coneCheckAcceleration = ConeCheck (position, slot.character.transform.eulerAngles);
 
 
-			Vector2 acceleration = formationSeekAcceleration + formationArriveAcceleration + targetSeekAcceleration + targetArriveAcceleration;
+			Vector2 acceleration = coneCheckAcceleration + formationSeekAcceleration + formationArriveAcceleration + targetSeekAcceleration + targetArriveAcceleration;
 
 			if (acceleration.magnitude > formationUnitMaxAcceleration) {
 				acceleration = formationUnitMaxAcceleration * acceleration.normalized;
@@ -126,12 +134,42 @@ public class Level2FormationSteering : MonoBehaviour {
 
 		}
 		averageVelocity *= 1f / (float)slotAssignments.Count;
+		Vector3 averageVelocity3D = averageVelocity;
+		anchorPoint.position += offsetConstant * averageVelocity3D;
+
+
+		if (Vector3.Distance(this.transform.position, path[currentIndex].transform.position) < .5f)
+		{
+			if (currentIndex < path.Length - 1)
+			{
+				currentIndex++;
+			}
+			else
+			{
+				completed = true;
+				rbody.velocity = new Vector2(0, 0);
+			}
+		}
+
+		if (!completed) {
+			Vector3 leadAcceleration = Pathfind (transform.position);
+			leadAcceleration += (transform.position - anchorPoint.position);
+			if (leadAcceleration.magnitude > leadUnitMaxAcceleration) {
+				leadAcceleration = leadUnitMaxAcceleration * leadAcceleration.normalized;
+			}
+			Vector2 leadAcceleration2D = leadAcceleration;
+			rbody.velocity += leadAcceleration2D;
+
+			if (rbody.velocity.magnitude > leadUnitMaxVelocity) {
+				rbody.velocity = leadUnitMaxVelocity * rbody.velocity.normalized;
+			}
+		}
 
 	}
 
 	Vector2 DynamicSeek(Vector3 position, Vector3 target, float maxAcceleration){
 		Vector2 linearAcc = target - position;
-		return maxAcceleration * linearAcc;
+		return maxAcceleration * linearAcc.normalized;
 
 	}
 
@@ -141,14 +179,36 @@ public class Level2FormationSteering : MonoBehaviour {
 		Vector2 directionVector = (target - position).normalized;
 		Vector2 targetVelocity = directionVector * targetSpeed;
 		Vector2 acceleration = (targetVelocity - currentVelocity) / timeToTarget;
-		return maxAcceleration * acceleration;
+		return maxAcceleration * acceleration.normalized;
+	}
+
+	Vector2 DynamicEvade(Vector3 position, Vector3 target, float maxAcceleration){
+		Vector2 linearAcc = position - target;
+		return maxAcceleration * linearAcc.normalized;
 	}
 
 	Vector2 ConeCheck(Vector3 position, Vector3 orientation){
-		
+		Collider2D[] colliders = Physics2D.OverlapCircleAll(position, coneCheckRadius);
+		Vector3 characterToCollider;
+		float dot;
+
+		// Cone check
+		foreach (Collider2D collider in colliders)
+		{
+			characterToCollider = (collider.transform.position - position);
+			dot = Vector3.Dot(characterToCollider, position);
+			if (dot >= Mathf.Cos(100 * Mathf.Deg2Rad) && collider.tag != "boid")
+			{
+
+				return DynamicEvade(position, collider.transform.position, formationUnitMaxAcceleration);
+			}
+		}
+		return Vector2.zero;
 	}
 
-
+	public Vector2 Pathfind(Vector3 position) {
+		return DynamicSeek(position, path[currentIndex].transform.position, leadUnitMaxAcceleration);
+	}
 
 
 
