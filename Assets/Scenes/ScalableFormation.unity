@@ -156,6 +156,10 @@ Prefab:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 90.05
       objectReference: {fileID: 0}
+    - target: {fileID: 1744886431916946, guid: 0da271b4e47d36645a2525af41320184, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0da271b4e47d36645a2525af41320184, type: 2}
   m_IsPrefabAsset: 0
@@ -446,6 +450,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 986a637b7f2d5864bb8c238c45e288d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startRadius: 1.6
+  startingNumberOfUnits: 12
+  unitPrefab: {fileID: 1716633009285674, guid: ed16a836afb9880429e0e66127036f45, type: 2}
+  characterRadius: 0.45
+  leaderColor: {r: 0.27055892, g: 0.43899873, b: 0.6037736, a: 1}
 --- !u!4 &979239393
 Transform:
   m_ObjectHideFlags: 0

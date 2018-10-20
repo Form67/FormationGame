@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class FormationScript : Movement {
-	
-
     [Header("Formation")]
-	public float formationWeightSeek;
-	public float formationWeightArrive;
+    public float formationWeightSeek;
+    public float formationWeightArrive;
 
     [Header("Scalable")]
     public float startRadius;
@@ -19,11 +17,11 @@ public class FormationScript : Movement {
 	int currentNumberOfUnits;
 
 	List<GameObject> unitsInFormation;
-	Rigidbody2D rbody;
+	//Rigidbody2D rbody;
 
 	// Use this for initialization
 	void Start () {
-        rbody = GetComponent<Rigidbody2D>();
+        //rbody = GetComponent<Rigidbody2D>();
 
         // Instantiate our list of units
         unitsInFormation = new List<GameObject>();
@@ -39,14 +37,14 @@ public class FormationScript : Movement {
 	void Update () {
 
         // Maintain our list of units
-		foreach (GameObject unit in unitsInFormation) {
-			if (unit == null) {
-				unitsInFormation.Remove (unit);
-				currentNumberOfUnits--;
-			}
-		}
+		//foreach (GameObject unit in unitsInFormation) {
+		//	if (unit == null) {
+		//		unitsInFormation.Remove (unit);
+		//		currentNumberOfUnits--;
+		//	}
+		//}
 
-        // 
+        // Compute values used to determine the target
 		currentRadius = characterRadius / Mathf.Sin(Mathf.PI / startingNumberOfUnits);
 		float angleDivision = 360.0f / (currentNumberOfUnits);
  
@@ -54,7 +52,7 @@ public class FormationScript : Movement {
 		Vector3 centerVector = (-currentRadius)  * new Vector3 (-Mathf.Sin (leadRotation * Mathf.Deg2Rad), 
 			Mathf.Cos (leadRotation * Mathf.Deg2Rad), 0) + transform.position;
 
-        // Move all units
+        // Move all units to the target
 		for (int i = 0; i < startingNumberOfUnits - 1; i++) {
 
             // Get attributes
