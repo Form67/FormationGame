@@ -21,4 +21,4 @@
 sysinfo.txt
 
 # VS cache
-/.vs
+\.vs/FormationGame/v15/Server/sqlite3/
