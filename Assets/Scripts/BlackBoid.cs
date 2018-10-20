@@ -66,10 +66,11 @@ public class BlackBoid : MonoBehaviour
         else
             rb.angularVelocity = 0;
     }
-    private void OnTriggerEnter2D(Collider2D collision)
+    
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.tag == "boid") {
-            Destroy(collision.gameObject);
+        if (collision.gameObject.tag == "boid") {
+            collision.gameObject.SendMessage("DestroySelf");
         }
     }
 

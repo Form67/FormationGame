@@ -420,8 +420,54 @@ Prefab:
       propertyPath: m_LocalPosition.x
       value: -0.57
       objectReference: {fileID: 0}
+    - target: {fileID: 1328867501781282, guid: db36baedbe3d7f846ae7a83e4a63af4f, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: db36baedbe3d7f846ae7a83e4a63af4f, type: 2}
+  m_IsPrefabAsset: 0
+--- !u!1001 &429977272
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4984435348380162, guid: 6866ca98d6e5c8a4ab9cfd5fa3113808, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 6.78
+      objectReference: {fileID: 0}
+    - target: {fileID: 4984435348380162, guid: 6866ca98d6e5c8a4ab9cfd5fa3113808, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 2.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4984435348380162, guid: 6866ca98d6e5c8a4ab9cfd5fa3113808, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4984435348380162, guid: 6866ca98d6e5c8a4ab9cfd5fa3113808, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4984435348380162, guid: 6866ca98d6e5c8a4ab9cfd5fa3113808, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4984435348380162, guid: 6866ca98d6e5c8a4ab9cfd5fa3113808, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4984435348380162, guid: 6866ca98d6e5c8a4ab9cfd5fa3113808, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4984435348380162, guid: 6866ca98d6e5c8a4ab9cfd5fa3113808, type: 2}
+      propertyPath: m_RootOrder
+      value: 6
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6866ca98d6e5c8a4ab9cfd5fa3113808, type: 2}
   m_IsPrefabAsset: 0
 --- !u!1 &979239391
 GameObject:
@@ -537,6 +583,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mouseControl: 1
   maxSpeed: 5
+  stoppingOffset: 0.05
 --- !u!1001 &1284375085
 Prefab:
   m_ObjectHideFlags: 0
@@ -575,6 +622,10 @@ Prefab:
     - target: {fileID: 4261699284816180, guid: 3d33f4589c8226d4aba70915807ae8ee, type: 2}
       propertyPath: m_RootOrder
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1357473648025130, guid: 3d33f4589c8226d4aba70915807ae8ee, type: 2}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3d33f4589c8226d4aba70915807ae8ee, type: 2}
