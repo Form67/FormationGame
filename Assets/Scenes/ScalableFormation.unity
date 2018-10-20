@@ -156,6 +156,10 @@ Prefab:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 90.05
       objectReference: {fileID: 0}
+    - target: {fileID: 1744886431916946, guid: 0da271b4e47d36645a2525af41320184, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0da271b4e47d36645a2525af41320184, type: 2}
   m_IsPrefabAsset: 0
@@ -175,15 +179,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2e59c732f59b97499246ffa0de8a52a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startRadius: 1.6
-  startingNumberOfUnits: 12
-  unitPrefab: {fileID: 1357473648025130, guid: 3d33f4589c8226d4aba70915807ae8ee, type: 2}
   maxAcceleration: 1
   maxVelocity: 1
   slowRadius: 0.24
   timeToTarget: 0.28
   formationWeightSeek: 0.6
   formationWeightArrive: 0.4
+  startRadius: 1.6
+  startingNumberOfUnits: 12
+  unitPrefab: {fileID: 1357473648025130, guid: 3d33f4589c8226d4aba70915807ae8ee, type: 2}
+  characterRadius: 0.45
 --- !u!50 &287558508
 Rigidbody2D:
   serializedVersion: 4
@@ -418,6 +423,51 @@ Prefab:
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: db36baedbe3d7f846ae7a83e4a63af4f, type: 2}
   m_IsPrefabAsset: 0
+--- !u!1 &979239391
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 979239393}
+  - component: {fileID: 979239392}
+  m_Layer: 0
+  m_Name: ScalableManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &979239392
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 979239391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 986a637b7f2d5864bb8c238c45e288d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startRadius: 1.6
+  startingNumberOfUnits: 12
+  unitPrefab: {fileID: 1716633009285674, guid: ed16a836afb9880429e0e66127036f45, type: 2}
+  characterRadius: 0.45
+  leaderColor: {r: 0.27055892, g: 0.43899873, b: 0.6037736, a: 1}
+--- !u!4 &979239393
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 979239391}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.76529, y: 0.50813866, z: -0.08499247}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &980462115
 Prefab:
   m_ObjectHideFlags: 0
