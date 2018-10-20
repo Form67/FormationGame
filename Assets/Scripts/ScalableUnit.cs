@@ -7,10 +7,10 @@ public class ScalableUnit : Movement
     [Header("Formation")]
     public float formationWeightSeek;
     public float formationWeightArrive;
-    public float formationAcceptanceRange;
 
     ScalableManager manager;
     Rigidbody2D rb;
+    
 
     // Use this for initialization
     void Awake () {
@@ -33,6 +33,7 @@ public class ScalableUnit : Movement
 
     }
 
+    // zRotate is in degrees
     public void SetTarget(Vector3 target, float zRotate = 0f)
     {
         // Blend between dynamic seek and arrive
@@ -54,25 +55,9 @@ public class ScalableUnit : Movement
         {
             rb.velocity = rb.velocity.normalized * maxVelocity;
         }
-
-        if(zRotate == 0)
-        {
-            zRotate = Mathf.Atan2(-rb.velocity.x, rb.velocity.y);
-        }
-
-        //if (Vector3.Distance(transform.position, target) < formationAcceptanceRange)
-        //{
-            // Adjust orientation
-            transform.eulerAngles = new Vector3(0, 0, zRotate * Mathf.Rad2Deg);
-        //}
-        //else
-        //{
-        //    // Update orientation
-        //    if (rb.velocity != Vector2.zero)
-        //        transform.up = Vector3.Slerp(transform.up, rb.velocity.normalized, Time.deltaTime * 30f);
-        //    else
-        //        rb.angularVelocity = 0;
-        //}
+        
+        //Adjust orientation
+        transform.eulerAngles = new Vector3(0, 0, zRotate);
     }
 
     void UpdateKinematics(float acceleration)

@@ -95,7 +95,7 @@ MonoBehaviour:
   timeToTarget: 0.28
   formationWeightSeek: 0.6
   formationWeightArrive: 0.4
-  formationAcceptanceRange: 0
+  formationAcceptanceRange: 1
 --- !u!212 &212988362492715790
 SpriteRenderer:
   m_ObjectHideFlags: 1

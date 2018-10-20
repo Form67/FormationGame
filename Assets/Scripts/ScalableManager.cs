@@ -84,7 +84,7 @@ public class ScalableManager : MonoBehaviour {
 
             Vector3 directionFromRadiusVector = new Vector3(-Mathf.Sin((leadRotation + angleDivision * (i + 1)) * Mathf.Deg2Rad),
                                                     Mathf.Cos((leadRotation + angleDivision * (i + 1)) * Mathf.Deg2Rad));
-            float zRotate = Mathf.Atan2(-directionFromRadiusVector.x, directionFromRadiusVector.y);
+            float zRotate = Mathf.Atan2(-directionFromRadiusVector.x, directionFromRadiusVector.y) * Mathf.Rad2Deg;
 
             Vector3 target = centerVector + currentRadius * directionFromRadiusVector;
             unitsInFormation[i].GetComponent<ScalableUnit>().SetTarget(target, zRotate);
