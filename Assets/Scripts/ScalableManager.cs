@@ -9,11 +9,18 @@ public class ScalableManager : MonoBehaviour {
     public int startingNumberOfUnits;
     public GameObject unitPrefab;
 
+
     public float characterRadius = 0.45f;
     float currentRadius;
     int currentNumberOfUnits;
 
     public Color leaderColor;
+
+    [Header("Path")]
+    public GameObject[] path;
+    public float pathAcceptanceRange = 0.5f;
+    public int currentIndex = 0;
+
     GameObject leader;
     List<GameObject> unitsInFormation;
 
@@ -39,6 +46,27 @@ public class ScalableManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void FixedUpdate () {
+
+        MoveLeader();
+        MoveUnits();
+    }
+
+    void MoveLeader()
+    {
+        //print("Leader position: " + transform.position + " " + path[currentIndex].transform.position);
+        if (Vector3.Distance(leader.transform.position, path[currentIndex].transform.position) < pathAcceptanceRange)
+        {
+            if (currentIndex < path.Length - 1)
+            {
+                currentIndex++;
+            }
+        }
+
+        leader.GetComponent<ScalableUnit>().SetTarget(path[currentIndex].transform.position);
+    }
+
+    void MoveUnits()
+    {
         // Compute values used to determine the target
         currentRadius = characterRadius / Mathf.Sin(Mathf.PI / startingNumberOfUnits);
         float angleDivision = 360.0f / (currentNumberOfUnits);
@@ -56,11 +84,13 @@ public class ScalableManager : MonoBehaviour {
 
             Vector3 directionFromRadiusVector = new Vector3(-Mathf.Sin((leadRotation + angleDivision * (i + 1)) * Mathf.Deg2Rad),
                                                     Mathf.Cos((leadRotation + angleDivision * (i + 1)) * Mathf.Deg2Rad));
+            float zRotate = Mathf.Atan2(-directionFromRadiusVector.x, directionFromRadiusVector.y);
 
             Vector3 target = centerVector + currentRadius * directionFromRadiusVector;
-            unitsInFormation[i].GetComponent<ScalableUnit>().SetTarget(target, directionFromRadiusVector);
+            unitsInFormation[i].GetComponent<ScalableUnit>().SetTarget(target, zRotate);
         }
     }
+
 
     public int GetBoidCount()
     {
