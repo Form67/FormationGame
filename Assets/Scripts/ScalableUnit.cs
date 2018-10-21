@@ -4,9 +4,13 @@ using UnityEngine;
 
 public class ScalableUnit : Movement
 {
-    [Header("Formation")]
+    [Header("Weights")]
     public float formationWeightSeek;
     public float formationWeightArrive;
+    public float coneWeight;
+
+    [Header("Cone Check")]
+    public float radius;
 
     ScalableManager manager;
     Rigidbody2D rb;
@@ -36,7 +40,11 @@ public class ScalableUnit : Movement
         // Blend between dynamic seek and arrive
         Vector2 formationAccelerationSeek = formationWeightSeek * DynamicSeek(transform.position, target);
         Vector2 formationAccelerationArrive = formationWeightArrive * DynamicArrive(transform.position, target, rb.velocity);
+        Vector2 coneCheckAvoid = coneWeight * ConeCheck();
         Vector2 acceleration = formationAccelerationSeek + formationAccelerationArrive;
+
+        if (coneCheckAvoid != Vector2.zero)
+            acceleration = acceleration * (1-coneWeight) + coneCheckAvoid;
 
         // Cap acceleration
         if (acceleration.magnitude > maxAcceleration)
@@ -56,7 +64,29 @@ public class ScalableUnit : Movement
         //Adjust orientation
         transform.eulerAngles = new Vector3(0, 0, zRotate);
     }
-    
+
+
+
+    Vector2 ConeCheck()
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, radius);
+        Vector2 forward = rb.velocity.normalized;
+
+        //Debug.DrawRay(transform.position, forward, Color.red);
+
+        // Cone check
+        foreach (Collider2D collider in colliders)
+        {
+            Vector3 targetDirection = collider.transform.position - transform.position;
+            float angle = Vector2.Angle(targetDirection, forward);
+            if (angle < 120 && collider.gameObject.tag == "Wall")
+            {
+                return DynamicEvade(transform.position, collider.gameObject.transform.position);
+            }
+        }
+
+        return Vector2.zero;
+    }
 
     public void DestroySelf()
     {

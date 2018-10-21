@@ -8,9 +8,7 @@ public class ScalableManager : MonoBehaviour {
     public float startRadius;
     public int startingNumberOfUnits;
     public GameObject unitPrefab;
-
-
-    public float characterRadius = 0.45f;
+    
     float currentRadius;
     int currentNumberOfUnits;
 
@@ -24,10 +22,10 @@ public class ScalableManager : MonoBehaviour {
     [Header("Leader")]
     public float maxDrift;
     public float maxDistToUnits;
-
-    Vector3 centerVector;
+    
     GameObject leader;
     List<GameObject> unitsInFormation;
+    Vector3 centerVector;
 
     // Use this for initialization
     void Awake () {
@@ -61,7 +59,6 @@ public class ScalableManager : MonoBehaviour {
     protected void CheckLeaderSpeed()
     {
         float speedReduction = 1.0f;
-
         float distToUnits = Vector3.Distance(leader.transform.position, centerVector);
 
         if (distToUnits > maxDistToUnits)
@@ -87,7 +84,7 @@ public class ScalableManager : MonoBehaviour {
     void MoveUnits()
     {
         // Compute values used to determine the target
-        currentRadius = characterRadius / Mathf.Sin(Mathf.PI / startingNumberOfUnits);
+        currentRadius = startRadius / Mathf.Sin(Mathf.PI / startingNumberOfUnits);
         float angleDivision = 360.0f / (currentNumberOfUnits);
 
         float leadRotation = leader.transform.eulerAngles.z;
@@ -143,5 +140,6 @@ public class ScalableManager : MonoBehaviour {
         else
             enabled = false; // no more units left -> do nothing
     }
-    
+
+
 }
