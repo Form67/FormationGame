@@ -469,7 +469,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1328867501781282, guid: db36baedbe3d7f846ae7a83e4a63af4f, type: 2}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: db36baedbe3d7f846ae7a83e4a63af4f, type: 2}
@@ -483,11 +483,11 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4984435348380162, guid: 6866ca98d6e5c8a4ab9cfd5fa3113808, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 6.78
+      value: -6.79
       objectReference: {fileID: 0}
     - target: {fileID: 4984435348380162, guid: 6866ca98d6e5c8a4ab9cfd5fa3113808, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 2.2
+      value: 4.06
       objectReference: {fileID: 0}
     - target: {fileID: 4984435348380162, guid: 6866ca98d6e5c8a4ab9cfd5fa3113808, type: 2}
       propertyPath: m_LocalPosition.z
@@ -586,7 +586,7 @@ MonoBehaviour:
   pathAcceptanceRange: 0.5
   currentIndex: 0
   maxDrift: 1
-  maxDistToUnits: 2.05
+  maxDistToUnits: 1
 --- !u!4 &979239393
 Transform:
   m_ObjectHideFlags: 0
