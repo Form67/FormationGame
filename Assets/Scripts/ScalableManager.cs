@@ -21,6 +21,11 @@ public class ScalableManager : MonoBehaviour {
     public float pathAcceptanceRange = 0.5f;
     public int currentIndex = 0;
 
+    [Header("Leader")]
+    public float maxDrift;
+    public float maxDistToUnits;
+
+    Vector3 centerVector;
     GameObject leader;
     List<GameObject> unitsInFormation;
 
@@ -46,9 +51,23 @@ public class ScalableManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void FixedUpdate () {
-
         MoveLeader();
         MoveUnits();
+        CheckLeaderSpeed();
+    }
+
+
+    // Reduce speed when leader is too far away from the other units
+    protected void CheckLeaderSpeed()
+    {
+        float speedReduction = 1.0f;
+
+        float distToUnits = Vector3.Distance(leader.transform.position, centerVector);
+
+        if (distToUnits > maxDistToUnits)
+            speedReduction = maxDrift / distToUnits;
+
+        leader.GetComponent<Rigidbody2D>().velocity = leader.GetComponent<Rigidbody2D>().velocity * speedReduction;
     }
 
     void MoveLeader()
@@ -72,8 +91,9 @@ public class ScalableManager : MonoBehaviour {
         float angleDivision = 360.0f / (currentNumberOfUnits);
 
         float leadRotation = leader.transform.eulerAngles.z;
-        Vector3 centerVector = (-currentRadius) * new Vector3(-Mathf.Sin(leadRotation * Mathf.Deg2Rad),
+        centerVector = (-currentRadius) * new Vector3(-Mathf.Sin(leadRotation * Mathf.Deg2Rad),
             Mathf.Cos(leadRotation * Mathf.Deg2Rad), 0) + leader.transform.position;
+        
 
         // Move all units to the target
         for (int i = 0; i < currentNumberOfUnits - 1; i++)
@@ -123,24 +143,5 @@ public class ScalableManager : MonoBehaviour {
         else
             enabled = false; // no more units left -> do nothing
     }
-
-    public Vector3 ComputeCenter()
-    {
-        if (unitsInFormation.Count == 1)
-            return leader.transform.position;
-
-        Vector3 center = Vector3.zero;
-        foreach (GameObject b in unitsInFormation)
-        {
-            // Don't keep the leader in mind
-            if (b == leader)
-                continue;
-
-            center += b.transform.position;
-
-        }
-
-        center /= unitsInFormation.Count;
-        return center;
-    }
+    
 }

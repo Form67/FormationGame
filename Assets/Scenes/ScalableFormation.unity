@@ -585,6 +585,8 @@ MonoBehaviour:
   - {fileID: 1301962982}
   pathAcceptanceRange: 0.5
   currentIndex: 0
+  maxDrift: 1
+  maxDistToUnits: 2.05
 --- !u!4 &979239393
 Transform:
   m_ObjectHideFlags: 0

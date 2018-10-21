@@ -23,11 +23,12 @@ public class ScalableUnit : Movement
     }
 
     // Update is called once per frame
-    void Update () {
+    void FixedUpdate () {
 
 		
 	}
-    
+
+
 
     // zRotate is in degrees
     public void SetTarget(Vector3 target, float zRotate = 0f)
