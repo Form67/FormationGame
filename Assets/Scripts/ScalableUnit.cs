@@ -27,11 +27,7 @@ public class ScalableUnit : Movement
 
 		
 	}
-
-    public void FollowPath()
-    {
-
-    }
+    
 
     // zRotate is in degrees
     public void SetTarget(Vector3 target, float zRotate = 0f)
@@ -59,11 +55,7 @@ public class ScalableUnit : Movement
         //Adjust orientation
         transform.eulerAngles = new Vector3(0, 0, zRotate);
     }
-
-    void UpdateKinematics(float acceleration)
-    {
-
-    }
+    
 
     public void DestroySelf()
     {

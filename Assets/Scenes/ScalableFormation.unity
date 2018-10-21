@@ -515,7 +515,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1752406167743286, guid: 6866ca98d6e5c8a4ab9cfd5fa3113808, type: 2}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6866ca98d6e5c8a4ab9cfd5fa3113808, type: 2}
@@ -583,6 +583,8 @@ MonoBehaviour:
   - {fileID: 580662725}
   - {fileID: 545494634}
   - {fileID: 1301962982}
+  pathAcceptanceRange: 0.5
+  currentIndex: 0
 --- !u!4 &979239393
 Transform:
   m_ObjectHideFlags: 0
