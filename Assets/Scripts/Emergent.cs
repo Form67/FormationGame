@@ -8,6 +8,7 @@ public class Emergent : MonoBehaviour {
     public bool myTurn;
     public bool atTunnelEntrance;
     public bool atTunnelExit;
+    public bool FinishedTunnel = false;
     public float closeEnoughDistance;
     public int currentIndex;
     public int amountFollowing;
@@ -112,13 +113,14 @@ public class Emergent : MonoBehaviour {
             else if (!canFollow)
             {
                 
-                if(currentIndex == 3) {
+                if(currentIndex == 3 && !FinishedTunnel) {
                     allBoids = GameObject.FindGameObjectsWithTag("boid");
                     foreach (GameObject b in allBoids) {
 
                         b.GetComponent<Emergent>().goingThroughTunnel = true;
                     }
                     GetComponent<TunnelBehavior>().enabled = true;
+                    FinishedTunnel = true;
                 }
                 float zRotation = Mathf.Atan2(-GetComponent<Rigidbody2D>().velocity.x, GetComponent<Rigidbody2D>().velocity.y);
                 transform.eulerAngles = new Vector3(0, 0, Mathf.Rad2Deg * zRotation);
