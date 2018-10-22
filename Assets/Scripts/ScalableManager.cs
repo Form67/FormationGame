@@ -110,21 +110,21 @@ public class ScalableManager : MonoBehaviour {
             }
 
         }
-        // Special Behavior: Object 6
-        else if (currentIndex == 7 || (currentIndex == 8 && moveIndex != unitsInFormation.Count))
-        {
-            if (currentIndex == 7)
-            {
-                leader.GetComponent<ScalableUnit>().SetTarget(path[currentIndex].transform.position, Mathf.Infinity, 20f);
-                MoveUnits(0, path[6].transform.position, 0.1f);
-            }
-            else if (currentIndex == 8)
-            {
-                leader.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
-                MoveAroundObj6();
-            }
+        //// Special Behavior: Object 6
+        //else if (currentIndex == 7 || (currentIndex == 8 && moveIndex != unitsInFormation.Count))
+        //{
+        //    if (currentIndex == 7)
+        //    {
+        //        leader.GetComponent<ScalableUnit>().SetTarget(path[currentIndex].transform.position, Mathf.Infinity, 20f);
+        //        MoveUnits(0, path[6].transform.position, 0.1f);
+        //    }
+        //    else if (currentIndex == 8)
+        //    {
+        //        leader.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+        //        MoveAroundObj6();
+        //    }
 
-        }
+        //}
         // Normal behavior
         else
         {
