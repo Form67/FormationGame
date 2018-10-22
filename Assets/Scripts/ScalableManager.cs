@@ -27,6 +27,9 @@ public class ScalableManager : MonoBehaviour {
     List<GameObject> unitsInFormation;
     Vector3 centerVector;
 
+    enum MovementMode { Normal, OneByOne, Row };
+    public int moveIndex = 0;
+
     // Use this for initialization
     void Awake () {
         // Instantiate our list of units
@@ -51,8 +54,6 @@ public class ScalableManager : MonoBehaviour {
 	void FixedUpdate () {
 
         MoveLeader();
-        MoveUnits();
-        CheckLeaderSpeed();
     }
 
 
@@ -93,20 +94,70 @@ public class ScalableManager : MonoBehaviour {
                 currentIndex++;
             }
         }
-        leader.GetComponent<ScalableUnit>().SetTarget(path[currentIndex].transform.position);
+
+        if (currentIndex == 3 || (currentIndex == 4 && moveIndex != unitsInFormation.Count)) {
+
+            if (currentIndex == 3)
+            {
+                leader.GetComponent<ScalableUnit>().SetTarget(path[currentIndex].transform.position, Mathf.Infinity, 20f);
+                MoveUnits(0, path[2].transform.position, 0.1f);
+            }
+            else if (currentIndex == 4)
+            {
+                leader.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+                MoveAroundObj2();
+            }
+
+        }
+        else
+        {
+            leader.GetComponent<ScalableUnit>().SetTarget(path[currentIndex].transform.position);
+            MoveUnits();
+            CheckLeaderSpeed();
+        }
     }
 
+
+    void MoveUnits(int startIndex, Vector3 target, float acceptRange)
+    {
+        for (int i = startIndex; i < currentNumberOfUnits - 1; i++)
+        {
+            if (Vector3.Distance(unitsInFormation[i].transform.position, target) < acceptRange)
+            {
+                unitsInFormation[i].GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+                continue;
+            }
+            unitsInFormation[i].GetComponent<ScalableUnit>().SetTarget(target, Mathf.Infinity, 20f);
+        }
+    }
 
     // Team members need to go through the tunnels one by one
     void MoveAroundObj2()
     {
+        MoveUnits(moveIndex+1, path[2].transform.position, 0.1f);
 
+        if (Vector3.Distance(unitsInFormation[moveIndex].transform.position, path[3].transform.position) < pathAcceptanceRange)
+        {
+            unitsInFormation[moveIndex].GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+            moveIndex++;
+        }
+
+        if(moveIndex < unitsInFormation.Count)
+            unitsInFormation[moveIndex].GetComponent<ScalableUnit>().SetTarget(path[3].transform.position, Mathf.Infinity, 20f);
     }
 
     // Team members need to go through the tunnels two or three in a row
     void MoveAroundObj6()
     {
 
+    }
+
+    void MoveUnits(Vector3 target)
+    {
+        for (int i = 0; i < currentNumberOfUnits - 1; i++)
+        {
+            unitsInFormation[i].GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+        }
     }
 
     void MoveUnits()
@@ -119,7 +170,6 @@ public class ScalableManager : MonoBehaviour {
         centerVector = (-currentRadius) * new Vector3(-Mathf.Sin(leadRotation * Mathf.Deg2Rad),
             Mathf.Cos(leadRotation * Mathf.Deg2Rad), 0) + leader.transform.position;
         
-
         // Move all units to the target
         for (int i = 0; i < currentNumberOfUnits - 1; i++)
         {

@@ -33,12 +33,12 @@ public class ScalableUnit : Movement
 	}
     
 
-    public void SetTarget(Vector3 target, float zRotate = 0f) // zRotate is in degrees
+    public void SetTarget(Vector3 target, float zRotate = 0f, float coneSweep = 120f) // zRotate is in degrees
     {
         // Blend between dynamic seek and arrive
         Vector2 formationAccelerationSeek = formationWeightSeek * DynamicSeek(transform.position, target);
         Vector2 formationAccelerationArrive = formationWeightArrive * DynamicArrive(transform.position, target, rb.velocity);
-        Vector2 coneCheckAvoid = coneWeight * ConeCheck();
+        Vector2 coneCheckAvoid = coneWeight * ConeCheck(coneSweep);
         Vector2 acceleration = formationAccelerationSeek + formationAccelerationArrive;
 
         if (coneCheckAvoid != Vector2.zero)
@@ -65,10 +65,15 @@ public class ScalableUnit : Movement
         }
 
         //Adjust orientation
+        if(zRotate == Mathf.Infinity)
+        {
+            Vector3 direction = rb.velocity.normalized;
+            zRotate = Mathf.Atan2(-direction.x, direction.y) * Mathf.Rad2Deg;
+        }
         transform.eulerAngles = new Vector3(0, 0, zRotate);
     }
 
-    Vector2 ConeCheck()
+    Vector2 ConeCheck(float coneSweep = 120f)
     {
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, radius);
         Vector2 forward = rb.velocity.normalized;
@@ -78,7 +83,7 @@ public class ScalableUnit : Movement
         {
             Vector3 targetDirection = collider.transform.position - transform.position;
             float angle = Vector2.Angle(targetDirection, forward);
-            if (angle < 120 && collider.gameObject.tag == "Wall")
+            if (angle < coneSweep && collider.gameObject.tag == "Wall")
             {
                 return DynamicEvade(transform.position, collider.gameObject.transform.position);
             }

@@ -450,6 +450,7 @@ MonoBehaviour:
   currentIndex: 0
   maxDrift: 0.35
   maxDistToFormationCenter: 0.76
+  moveIndex: 0
 --- !u!4 &979239393
 Transform:
   m_ObjectHideFlags: 0
