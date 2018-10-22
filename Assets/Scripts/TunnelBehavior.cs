@@ -39,7 +39,8 @@ public class TunnelBehavior : MonoBehaviour {
             endTimer -= Time.deltaTime;
             if (endTimer <= 0)
             {
-                foreach (GameObject b in enterOrder.Values)
+                boids = GameObject.FindGameObjectsWithTag("boid");
+                foreach (GameObject b in boids)
                 {
                     b.GetComponent<Emergent>().goingThroughTunnel = false;
                     b.GetComponent<Emergent>().atTunnelEntrance = false;
