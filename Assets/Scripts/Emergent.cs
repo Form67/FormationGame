@@ -45,40 +45,41 @@ public class Emergent : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
+
+        if (canFollow && forwardUnit == null)
+        {
+            allBoids = GameObject.FindGameObjectsWithTag("boid");
+            if (canFollow)
+            {
+                depth = int.MaxValue;
+            }
+            var minLayer = int.MaxValue;
+            var f = this.gameObject;
+            foreach (GameObject g in allBoids)
+            {
+                if (g != this.gameObject && g.GetComponent<Emergent>().depth < minLayer && PositionOpen(g) && g.gameObject != backLeft && g.gameObject != backRight)
+                {
+                    minLayer = g.GetComponent<Emergent>().depth;
+
+                    f = g;
+                }
+
+            }
+            int t = f.GetComponent<Emergent>().RequestEntry(this.gameObject);
+            this.depth = f.GetComponent<Emergent>().depth + 1;
+            if (t == 1)
+            {
+                this.forwardUnit = f;
+                isLeft = true;
+            }
+            else
+            {
+                this.forwardUnit = f;
+                isLeft = false;
+            }
+        }
         if (!goingThroughTunnel)
         {
-            if (canFollow && forwardUnit == null)
-            {
-                allBoids = GameObject.FindGameObjectsWithTag("boid");
-                if (canFollow)
-                {
-                    depth = int.MaxValue;
-                }
-                var minLayer = int.MaxValue;
-                var f = this.gameObject;
-                foreach (GameObject g in allBoids)
-                {
-                    if (g != this.gameObject && g.GetComponent<Emergent>().depth < minLayer && PositionOpen(g) && g.gameObject != backLeft && g.gameObject != backRight)
-                    {
-                        minLayer = g.GetComponent<Emergent>().depth;
-
-                        f = g;
-                    }
-
-                }
-                int t = f.GetComponent<Emergent>().RequestEntry(this.gameObject);
-                this.depth = f.GetComponent<Emergent>().depth + 1;
-                if (t == 1)
-                {
-                    this.forwardUnit = f;
-                    isLeft = true;
-                }
-                else
-                {
-                    this.forwardUnit = f;
-                    isLeft = false;
-                }
-            }
             if (forwardUnit != null && canFollow)
             {
                 var tempVect = new Vector3();
@@ -110,8 +111,11 @@ public class Emergent : MonoBehaviour {
             }
             else if (!canFollow)
             {
+                
                 if(currentIndex == 3) {
+                    allBoids = GameObject.FindGameObjectsWithTag("boid");
                     foreach (GameObject b in allBoids) {
+
                         b.GetComponent<Emergent>().goingThroughTunnel = true;
                     }
                     GetComponent<TunnelBehavior>().enabled = true;
@@ -133,7 +137,7 @@ public class Emergent : MonoBehaviour {
                 }
                 Vector2 formationAccelerationSeek = Pathfind();
                 Vector2 formationAccelerationArrive = DynamicArrive(this.transform.position, path[currentIndex].transform.position, rb.velocity);
-                Vector2 acceleration = formationAccelerationSeek + formationAccelerationArrive + coneCheck(this.gameObject) * .2f;
+                Vector2 acceleration = formationAccelerationSeek + formationAccelerationArrive + coneCheck(this.gameObject) * .5f;
                 if (acceleration.magnitude > maxAcceleration)
                 {
                     acceleration = acceleration.normalized * maxAcceleration;
@@ -271,6 +275,7 @@ public Vector2 Pathfind()
         Vector2 acceleration = (targetVelocity - currentVelocity) / timeToTarget;
         return maxAcceleration * acceleration;
     }
+
     public Vector2 MoveThroughTunnel(GameObject tunnelEntrance,GameObject tunnelExit) {
         if (Vector2.Distance(transform.position, tunnelEntrance.transform.position) < .2f) {
             atTunnelEntrance = true;
@@ -287,5 +292,29 @@ public Vector2 Pathfind()
             return DynamicSeek(this.transform.position, tunnelEntrance.transform.position);
         }
        return DynamicArrive(this.transform.position, tunnelExit.transform.position,rb.velocity);
+    }
+    public void DestroySelf() {
+        if (canFollow == false)
+        {
+            if (backLeft != null)
+            {
+                var temp = backLeft;
+                backLeft.GetComponent<Emergent>().backLeft = backLeft;
+                transform.position = temp.transform.position;
+                Destroy(temp.gameObject);
+
+            }
+            else if (backRight != null)
+            {
+
+            }
+            else {
+                Destroy(gameObject);
+            }
+        }
+        else {
+            Destroy(gameObject);
+
+        }
     }
 }
