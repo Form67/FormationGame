@@ -81,6 +81,8 @@ public class Level2FormationSteering : MonoBehaviour {
 
 	public float maxDistanceConstant;
 
+	public float coneCheckConstant;
+	GameObject[] walls;
 	int currentIndex;
 	bool completed;
 	Rigidbody2D rbody;
@@ -98,6 +100,8 @@ public class Level2FormationSteering : MonoBehaviour {
 		currentIndex = 0;
 		rbody = GetComponent<Rigidbody2D> ();
 		completed = false;
+		walls = GameObject.FindGameObjectsWithTag("Wall");
+
 	}
 	
 	// Update is called once per frame
@@ -117,7 +121,7 @@ public class Level2FormationSteering : MonoBehaviour {
 			Vector2 targetSeekAcceleration = DynamicSeek (position, target, formationUnitMaxAcceleration);
 			Vector2 targetArriveAcceleration = DynamicArrive (position, target, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
 
-			Vector2 coneCheckAcceleration = ConeCheck (position, slot.character.transform.eulerAngles);
+			Vector2 coneCheckAcceleration = coneCheckConstant * coneCheck(slot.character);
 
 
 			Vector2 acceleration = coneCheckAcceleration + formationSeekAcceleration + formationArriveAcceleration + targetSeekAcceleration + targetArriveAcceleration;
@@ -132,17 +136,15 @@ public class Level2FormationSteering : MonoBehaviour {
 				rb.velocity = formationUnitMaxVelocity * rb.velocity.normalized;
 			}
 
+			float angle = Mathf.Rad2Deg * Mathf.Atan2 (-rb.velocity.x, rb.velocity.y);
 
+			slot.character.transform.eulerAngles = new Vector3 (0, 0, angle);
 
 
 
 		}
 
-		/*Vector3 averageVelocity3D = averageVelocity;
-		anchorPoint.position += offsetConstant * averageVelocity3D;
-
-
-	*/
+	
 		if (Vector3.Distance(this.transform.position, path[currentIndex].transform.position) < .5f)
 		{
 			if (currentIndex < path.Length - 1)
@@ -174,6 +176,7 @@ public class Level2FormationSteering : MonoBehaviour {
 				rbody.velocity *= 0.3f;
 
 			}
+			float leadAngle = Mathf.Rad2Deg * Mathf.Atan2 (-rbody.velocity.x, rbody.velocity.y);
 		}
 
 	}
@@ -197,7 +200,7 @@ public class Level2FormationSteering : MonoBehaviour {
 		Vector2 linearAcc = position - target;
 		return maxAcceleration * linearAcc.normalized;
 	}
-
+	/*
 	Vector2 ConeCheck(Vector3 position, Vector3 orientation){
 		Collider2D[] colliders = Physics2D.OverlapCircleAll(position, coneCheckRadius);
 		Vector3 characterToCollider;
@@ -213,6 +216,43 @@ public class Level2FormationSteering : MonoBehaviour {
 
 				return DynamicEvade(position, collider.transform.position, formationUnitMaxAcceleration);
 			}
+		}
+		return Vector2.zero;
+	}
+	*/
+	public Vector2 coneCheck(GameObject b)
+	{
+		GameObject smallestDistance = null;
+		float smallestDistanceAmount = 10000;
+		Vector2 ourVelocity = b.GetComponent<Rigidbody2D>().velocity;
+		foreach (GameObject g in walls)
+		{
+			if (g != b)
+			{
+				if (Vector3.Distance(g.transform.position, b.transform.position) < coneCheckRadius)
+				{
+					if (Vector3.Angle(g.transform.position, b.transform.position) < 90)
+					{
+						if (Vector3.Distance(g.transform.position, b.transform.position) < smallestDistanceAmount)
+						{
+							smallestDistance = g;
+							smallestDistanceAmount = Vector3.Distance(g.transform.position, b.transform.position);
+							//Vector2 theirVelocity = g.GetComponent<Rigidbody2D>().velocity;
+						}
+					}
+				}
+			}
+
+		}
+		if (smallestDistance != null)
+		{
+
+			Vector3 ourVelocity3D = ourVelocity;
+			Vector3 predictedPosition = b.transform.position + smallestDistanceAmount * ourVelocity3D;
+			// Vector3 theirVelocity3D = smallestDistance.GetComponent<Rigidbody2D>().velocity;
+			Vector3 targetPredictedPosition = smallestDistance.transform.position; //smallestDistanceAmount * theirVelocity3D;
+			//print(DynamicEvade(predictedPosition, targetPredictedPosition));
+			return DynamicEvade(predictedPosition, targetPredictedPosition, formationUnitMaxAcceleration);
 		}
 		return Vector2.zero;
 	}
