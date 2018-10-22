@@ -49,6 +49,7 @@ public class ScalableManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void FixedUpdate () {
+
         MoveLeader();
         MoveUnits();
         CheckLeaderSpeed();
@@ -78,13 +79,34 @@ public class ScalableManager : MonoBehaviour {
         //print("Leader position: " + transform.position + " " + path[currentIndex].transform.position);
         if (Vector3.Distance(leader.transform.position, path[currentIndex].transform.position) < pathAcceptanceRange)
         {
+            // Leader should check if there is enough space for the entire formation to move around the corner with obj 1
+            if (currentIndex == 0)
+            {
+                float distToObj1 = Vector3.Distance(centerVector, path[0].transform.position);
+                if (distToObj1 < maxDistToFormationCenter)
+                    currentIndex++;
+            }
+
+            // Default path finding behavior
             if (currentIndex < path.Length - 1)
             {
                 currentIndex++;
             }
         }
-
         leader.GetComponent<ScalableUnit>().SetTarget(path[currentIndex].transform.position);
+    }
+
+
+    // Team members need to go through the tunnels one by one
+    void MoveAroundObj2()
+    {
+
+    }
+
+    // Team members need to go through the tunnels two or three in a row
+    void MoveAroundObj6()
+    {
+
     }
 
     void MoveUnits()

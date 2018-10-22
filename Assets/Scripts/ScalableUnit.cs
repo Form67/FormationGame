@@ -31,11 +31,9 @@ public class ScalableUnit : Movement
 
 		
 	}
+    
 
-
-
-    // zRotate is in degrees
-    public void SetTarget(Vector3 target, float zRotate = 0f)
+    public void SetTarget(Vector3 target, float zRotate = 0f) // zRotate is in degrees
     {
         // Blend between dynamic seek and arrive
         Vector2 formationAccelerationSeek = formationWeightSeek * DynamicSeek(transform.position, target);
@@ -46,6 +44,11 @@ public class ScalableUnit : Movement
         if (coneCheckAvoid != Vector2.zero)
             acceleration = acceleration * (1-coneWeight) + coneCheckAvoid;
 
+        UpdateKinematics(acceleration, zRotate);
+    }
+    
+    void UpdateKinematics(Vector2 acceleration, float zRotate = 0f) // zRotate is in degrees
+    {
         // Cap acceleration
         if (acceleration.magnitude > maxAcceleration)
         {
@@ -60,12 +63,10 @@ public class ScalableUnit : Movement
         {
             rb.velocity = rb.velocity.normalized * maxVelocity;
         }
-        
+
         //Adjust orientation
         transform.eulerAngles = new Vector3(0, 0, zRotate);
     }
-
-
 
     Vector2 ConeCheck()
     {
@@ -85,6 +86,7 @@ public class ScalableUnit : Movement
 
         return Vector2.zero;
     }
+    
 
     public void DestroySelf()
     {
