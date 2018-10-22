@@ -95,6 +95,7 @@ public class ScalableManager : MonoBehaviour {
             }
         }
 
+        // Special Behavior: Object 2
         if (currentIndex == 3 || (currentIndex == 4 && moveIndex != unitsInFormation.Count)) {
 
             if (currentIndex == 3)
@@ -109,27 +110,37 @@ public class ScalableManager : MonoBehaviour {
             }
 
         }
+        // Special Behavior: Object 6
+        else if (currentIndex == 7 || (currentIndex == 8 && moveIndex != unitsInFormation.Count))
+        {
+            if (currentIndex == 7)
+            {
+                leader.GetComponent<ScalableUnit>().SetTarget(path[currentIndex].transform.position, Mathf.Infinity, 20f);
+                MoveUnits(0, path[6].transform.position, 0.1f);
+            }
+            else if (currentIndex == 8)
+            {
+                leader.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+                MoveAroundObj6();
+            }
+
+        }
+        // Normal behavior
         else
         {
             leader.GetComponent<ScalableUnit>().SetTarget(path[currentIndex].transform.position);
             MoveUnits();
             CheckLeaderSpeed();
-        }
-    }
 
-
-    void MoveUnits(int startIndex, Vector3 target, float acceptRange)
-    {
-        for (int i = startIndex; i < currentNumberOfUnits - 1; i++)
-        {
-            if (Vector3.Distance(unitsInFormation[i].transform.position, target) < acceptRange)
+            
+            if (currentIndex == 6)
             {
-                unitsInFormation[i].GetComponent<Rigidbody2D>().velocity = Vector2.zero;
-                continue;
+                moveIndex = 0; // reset before being used in object 6 manuvering
             }
-            unitsInFormation[i].GetComponent<ScalableUnit>().SetTarget(target, Mathf.Infinity, 20f);
         }
     }
+
+
 
     // Team members need to go through the tunnels one by one
     void MoveAroundObj2()
@@ -149,7 +160,30 @@ public class ScalableManager : MonoBehaviour {
     // Team members need to go through the tunnels two or three in a row
     void MoveAroundObj6()
     {
+        MoveUnits(moveIndex + 1, path[6].transform.position, 0.1f);
 
+        if (Vector3.Distance(unitsInFormation[moveIndex].transform.position, path[7].transform.position) < pathAcceptanceRange)
+        {
+            unitsInFormation[moveIndex].GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+            moveIndex++;
+        }
+
+        if (moveIndex < unitsInFormation.Count)
+            unitsInFormation[moveIndex].GetComponent<ScalableUnit>().SetTarget(path[7].transform.position, Mathf.Infinity, 20f);
+    }
+
+
+    void MoveUnits(int startIndex, Vector3 target, float acceptRange)
+    {
+        for (int i = startIndex; i < currentNumberOfUnits - 1; i++)
+        {
+            if (Vector3.Distance(unitsInFormation[i].transform.position, target) < acceptRange)
+            {
+                unitsInFormation[i].GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+                continue;
+            }
+            unitsInFormation[i].GetComponent<ScalableUnit>().SetTarget(target, Mathf.Infinity, 20f);
+        }
     }
 
     void MoveUnits(Vector3 target)
