@@ -5,6 +5,9 @@ using UnityEngine;
 public class Emergent : MonoBehaviour {
     public GameObject[] path;
     public bool arrived;
+    public bool myTurn;
+    public bool atTunnelEntrance;
+    public bool atTunnelExit;
     public float closeEnoughDistance;
     public int currentIndex;
     public int amountFollowing;
@@ -26,7 +29,9 @@ public class Emergent : MonoBehaviour {
     public float maxVelocity;
     public float slowRadius;
     public float timeToTarget;
-
+    public GameObject tunnelExit;
+    public GameObject tunnelEntrance;
+    public bool goingThroughTunnel;
     // Use this for initialization
     void Start () {
         allBoids = GameObject.FindGameObjectsWithTag("boid");
@@ -40,96 +45,132 @@ public class Emergent : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-        if (canFollow && forwardUnit == null)
+        if (!goingThroughTunnel)
         {
-            allBoids = GameObject.FindGameObjectsWithTag("boid");
-            if (canFollow)
+            if (canFollow && forwardUnit == null)
             {
-                depth = int.MaxValue;
-            }
-            var minLayer = int.MaxValue;
-            var f = this.gameObject;
-            foreach (GameObject g in allBoids)
-            {
-                if (g != this.gameObject && g.GetComponent<Emergent>().depth < minLayer && PositionOpen(g) && g.gameObject != backLeft && g.gameObject != backRight)
+                allBoids = GameObject.FindGameObjectsWithTag("boid");
+                if (canFollow)
                 {
-                    minLayer = g.GetComponent<Emergent>().depth;
-
-                    f = g;
+                    depth = int.MaxValue;
                 }
-
-            }
-            int t = f.GetComponent<Emergent>().RequestEntry(this.gameObject);
-            this.depth = f.GetComponent<Emergent>().depth + 1;
-            if (t == 1)
-            {
-                this.forwardUnit = f;
-                isLeft = true;
-            }
-            else
-            {
-                this.forwardUnit = f;
-                isLeft = false;
-            }
-        }
-        if (forwardUnit != null && canFollow)
-        {
-            var tempVect = new Vector3();
-            if (isLeft)
-            {
-                tempVect = -forwardUnit.transform.right * seperationAngle;
-            }
-            else
-            {
-                tempVect = forwardUnit.transform.right * seperationAngle;
-            }
-            destination = forwardUnit.transform.position - forwardUnit.transform.up * seperationDistance + tempVect;
-
-            Vector2 formationAccelerationSeek = DynamicSeek(transform.position, destination);
-            Vector2 formationAccelerationArrive = DynamicArrive(this.transform.position, destination, rb.velocity);
-            Vector2 acceleration = formationAccelerationSeek + formationAccelerationArrive + coneCheck(this.gameObject)*.6f ;
-            if (acceleration.magnitude > maxAcceleration)
-            {
-                acceleration = acceleration.normalized * maxAcceleration;
-            }
-
-            rb.velocity += acceleration;
-
-            if (rb.velocity.magnitude > maxVelocity)
-            {
-                rb.velocity = rb.velocity.normalized * maxVelocity;
-            }
-            transform.rotation = forwardUnit.transform.rotation;
-        }
-        else if (!canFollow)
-        {
-            float zRotation = Mathf.Atan2(-GetComponent<Rigidbody2D>().velocity.x, GetComponent<Rigidbody2D>().velocity.y);
-            transform.eulerAngles = new Vector3(0, 0, Mathf.Rad2Deg * zRotation);
-            if (Vector3.Distance(this.transform.position, path[currentIndex].transform.position) < .5f)
-            {
-                if (currentIndex < path.Length - 1)
+                var minLayer = int.MaxValue;
+                var f = this.gameObject;
+                foreach (GameObject g in allBoids)
                 {
-                    currentIndex++;
-                    // transform.up = path[currentIndex].transform.position - transform.position;
+                    if (g != this.gameObject && g.GetComponent<Emergent>().depth < minLayer && PositionOpen(g) && g.gameObject != backLeft && g.gameObject != backRight)
+                    {
+                        minLayer = g.GetComponent<Emergent>().depth;
+
+                        f = g;
+                    }
+
+                }
+                int t = f.GetComponent<Emergent>().RequestEntry(this.gameObject);
+                this.depth = f.GetComponent<Emergent>().depth + 1;
+                if (t == 1)
+                {
+                    this.forwardUnit = f;
+                    isLeft = true;
                 }
                 else
                 {
-                    arrived = true;
-                    rb.velocity = new Vector2(0, 0);
+                    this.forwardUnit = f;
+                    isLeft = false;
                 }
             }
-            Vector2 formationAccelerationSeek = Pathfind();
-            Vector2 formationAccelerationArrive = DynamicArrive(this.transform.position, path[currentIndex].transform.position, rb.velocity);
-            Vector2 acceleration = formationAccelerationSeek + formationAccelerationArrive + coneCheck(this.gameObject)*.2f;
-            if (acceleration.magnitude > maxAcceleration)
+            if (forwardUnit != null && canFollow)
             {
-                acceleration = acceleration.normalized * maxAcceleration;
-            }
-            rb.velocity += acceleration;
+                var tempVect = new Vector3();
+                if (isLeft)
+                {
+                    tempVect = -forwardUnit.transform.right * seperationAngle;
+                }
+                else
+                {
+                    tempVect = forwardUnit.transform.right * seperationAngle;
+                }
+                destination = forwardUnit.transform.position - forwardUnit.transform.up * seperationDistance + tempVect;
 
-            if (rb.velocity.magnitude > maxVelocity)
+                Vector2 formationAccelerationSeek = DynamicSeek(transform.position, destination);
+                Vector2 formationAccelerationArrive = DynamicArrive(this.transform.position, destination, rb.velocity);
+                Vector2 acceleration = formationAccelerationSeek + formationAccelerationArrive + coneCheck(this.gameObject) * .6f;
+                if (acceleration.magnitude > maxAcceleration)
+                {
+                    acceleration = acceleration.normalized * maxAcceleration;
+                }
+
+                rb.velocity += acceleration;
+
+                if (rb.velocity.magnitude > maxVelocity)
+                {
+                    rb.velocity = rb.velocity.normalized * maxVelocity;
+                }
+                transform.rotation = forwardUnit.transform.rotation;
+            }
+            else if (!canFollow)
             {
-                rb.velocity = rb.velocity.normalized * maxVelocity;
+                if(currentIndex == 3) {
+                    foreach (GameObject b in allBoids) {
+                        b.GetComponent<Emergent>().goingThroughTunnel = true;
+                    }
+                    GetComponent<TunnelBehavior>().enabled = true;
+                }
+                float zRotation = Mathf.Atan2(-GetComponent<Rigidbody2D>().velocity.x, GetComponent<Rigidbody2D>().velocity.y);
+                transform.eulerAngles = new Vector3(0, 0, Mathf.Rad2Deg * zRotation);
+                if (Vector3.Distance(this.transform.position, path[currentIndex].transform.position) < .5f)
+                {
+                    if (currentIndex < path.Length - 1)
+                    {
+                        currentIndex++;
+                        // transform.up = path[currentIndex].transform.position - transform.position;
+                    }
+                    else
+                    {
+                        arrived = true;
+                        rb.velocity = new Vector2(0, 0);
+                    }
+                }
+                Vector2 formationAccelerationSeek = Pathfind();
+                Vector2 formationAccelerationArrive = DynamicArrive(this.transform.position, path[currentIndex].transform.position, rb.velocity);
+                Vector2 acceleration = formationAccelerationSeek + formationAccelerationArrive + coneCheck(this.gameObject) * .2f;
+                if (acceleration.magnitude > maxAcceleration)
+                {
+                    acceleration = acceleration.normalized * maxAcceleration;
+                }
+                rb.velocity += acceleration;
+
+                if (rb.velocity.magnitude > maxVelocity)
+                {
+                    rb.velocity = rb.velocity.normalized * maxVelocity;
+                }
+            }
+        }
+        else
+        {
+
+            if (myTurn)
+            {
+
+                Vector2 acceleration = MoveThroughTunnel(tunnelEntrance,  tunnelExit);
+                if (acceleration.magnitude > maxAcceleration)
+                {
+                    acceleration = acceleration.normalized * maxAcceleration;
+                }
+
+                rb.velocity += acceleration;
+
+                if (rb.velocity.magnitude > maxVelocity)
+                {
+                    rb.velocity = rb.velocity.normalized * maxVelocity;
+                }
+                float zRotation = Mathf.Atan2(-GetComponent<Rigidbody2D>().velocity.x, GetComponent<Rigidbody2D>().velocity.y);
+                transform.eulerAngles = new Vector3(0, 0, Mathf.Rad2Deg * zRotation);
+            }
+            else
+            {
+                rb.velocity = Vector2.zero;
+
             }
         }
     }
@@ -230,7 +271,21 @@ public Vector2 Pathfind()
         Vector2 acceleration = (targetVelocity - currentVelocity) / timeToTarget;
         return maxAcceleration * acceleration;
     }
-    public void MoveThroughTunnel(GameObject tunnelExit) {
-        DynamicSeek(this.transform.position, tunnelExit.transform.position);
+    public Vector2 MoveThroughTunnel(GameObject tunnelEntrance,GameObject tunnelExit) {
+        if (Vector2.Distance(transform.position, tunnelEntrance.transform.position) < .2f) {
+            atTunnelEntrance = true;
+        }
+        if (Vector2.Distance(transform.position, tunnelExit.transform.position) < .2f)
+        {
+            atTunnelExit = true;
+        }
+        if (atTunnelExit)
+        {
+            return DynamicArrive(this.transform.position, this.transform.position,rb.velocity);
+        }
+        if (!atTunnelEntrance) {
+            return DynamicSeek(this.transform.position, tunnelEntrance.transform.position);
+        }
+       return DynamicArrive(this.transform.position, tunnelExit.transform.position,rb.velocity);
     }
 }

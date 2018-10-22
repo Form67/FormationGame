@@ -4,14 +4,17 @@ using UnityEngine;
 
 public class ScalableUnit : Movement
 {
-    [Header("Formation")]
+    [Header("Weights")]
     public float formationWeightSeek;
     public float formationWeightArrive;
-    public float formationAcceptanceRange;
+    public float coneWeight;
 
+    [Header("Cone Check")]
+    public float radius;
 
     ScalableManager manager;
     Rigidbody2D rb;
+    
 
     // Use this for initialization
     void Awake () {
@@ -24,18 +27,28 @@ public class ScalableUnit : Movement
     }
 
     // Update is called once per frame
-    void Update () {
+    void FixedUpdate () {
 
 		
 	}
+    
 
-    public void SetTarget(Vector3 target, Vector3 directionFromRadiusVector)
+    public void SetTarget(Vector3 target, float zRotate = 0f, float coneSweep = 120f) // zRotate is in degrees
     {
         // Blend between dynamic seek and arrive
         Vector2 formationAccelerationSeek = formationWeightSeek * DynamicSeek(transform.position, target);
         Vector2 formationAccelerationArrive = formationWeightArrive * DynamicArrive(transform.position, target, rb.velocity);
+        Vector2 coneCheckAvoid = coneWeight * ConeCheck(coneSweep);
         Vector2 acceleration = formationAccelerationSeek + formationAccelerationArrive;
 
+        if (coneCheckAvoid != Vector2.zero)
+            acceleration = acceleration * (1-coneWeight) + coneCheckAvoid;
+
+        UpdateKinematics(acceleration, zRotate);
+    }
+    
+    void UpdateKinematics(Vector2 acceleration, float zRotate = 0f) // zRotate is in degrees
+    {
         // Cap acceleration
         if (acceleration.magnitude > maxAcceleration)
         {
@@ -51,11 +64,34 @@ public class ScalableUnit : Movement
             rb.velocity = rb.velocity.normalized * maxVelocity;
         }
 
-        // Adjust orientation
-        float unitRotation = Mathf.Atan2(-directionFromRadiusVector.x, directionFromRadiusVector.y);
-        transform.eulerAngles = new Vector3(0, 0, unitRotation * Mathf.Rad2Deg);
-        
+        //Adjust orientation
+        if(zRotate == Mathf.Infinity)
+        {
+            Vector3 direction = rb.velocity.normalized;
+            zRotate = Mathf.Atan2(-direction.x, direction.y) * Mathf.Rad2Deg;
+        }
+        transform.eulerAngles = new Vector3(0, 0, zRotate);
     }
+
+    Vector2 ConeCheck(float coneSweep = 120f)
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, radius);
+        Vector2 forward = rb.velocity.normalized;
+
+        // Cone check
+        foreach (Collider2D collider in colliders)
+        {
+            Vector3 targetDirection = collider.transform.position - transform.position;
+            float angle = Vector2.Angle(targetDirection, forward);
+            if (angle < coneSweep && collider.gameObject.tag == "Wall")
+            {
+                return DynamicEvade(transform.position, collider.gameObject.transform.position);
+            }
+        }
+
+        return Vector2.zero;
+    }
+    
 
     public void DestroySelf()
     {

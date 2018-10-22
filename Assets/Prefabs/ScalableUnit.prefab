@@ -69,10 +69,10 @@ CircleCollider2D:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1716633009285674}
-  m_Enabled: 0
+  m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: -0.4420095}
@@ -95,7 +95,8 @@ MonoBehaviour:
   timeToTarget: 0.28
   formationWeightSeek: 0.6
   formationWeightArrive: 0.4
-  formationAcceptanceRange: 0
+  coneWeight: 0.95
+  radius: 0.65
 --- !u!212 &212988362492715790
 SpriteRenderer:
   m_ObjectHideFlags: 1

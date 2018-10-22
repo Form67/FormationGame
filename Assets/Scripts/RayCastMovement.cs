@@ -19,6 +19,7 @@ public class RayCastMovement : MonoBehaviour {
     public bool arrived;
     public int currentIndex;
     public Rigidbody2D rb;
+
 	// Use this for initialization
 	void Start () {
         rb = GetComponent<Rigidbody2D>();
