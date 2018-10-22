@@ -239,7 +239,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numberOfSlots: 12
-  characterRadius: 1.63
+  characterRadius: 0.45
   unitPrefab: {fileID: 1357473648025130, guid: 3d33f4589c8226d4aba70915807ae8ee, type: 2}
   anchorOffset: 1.03
   timeToTarget: 0.72
@@ -261,7 +261,7 @@ MonoBehaviour:
   formationUnitMaxVelocity: 0.77
   formationUnitMaxAcceleration: 0.73
   offsetConstant: 0.57
-  maxDistanceConstant: 1.28
+  maxDistanceConstant: 1.68
 --- !u!50 &512065289
 Rigidbody2D:
   serializedVersion: 4

@@ -102,12 +102,13 @@ public class Level2FormationSteering : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		Vector2 averageVelocity = Vector2.zero;
+		Vector3 averageVelocity = getAverageVelocity();
+		Vector3 anchorPosition = offsetConstant * averageVelocity + getAverageUnitPosition ();
 		foreach (SlotAssignment slot in slotAssignments) {
 			Rigidbody2D rb = slot.character.GetComponent<Rigidbody2D> ();
 
 			Vector3 position = slot.character.transform.position;
-			Vector3 target = pattern.getSlotLocation (slot.slotNumber).position + anchorPoint.position;
+			Vector3 target = pattern.getSlotLocation (slot.slotNumber).position + anchorPosition;
 			Vector2 formationSeekAcceleration = DynamicSeek (position, target, formationUnitMaxAcceleration);
 			Vector2 formationArriveAcceleration = DynamicArrive (position, target, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
 
@@ -133,18 +134,15 @@ public class Level2FormationSteering : MonoBehaviour {
 
 
 
-			averageVelocity += rb.velocity;
+
 
 		}
-		averageVelocity *= 1f / (float)slotAssignments.Count;
-		if (averageVelocity.magnitude > formationUnitMaxVelocity) {
-			averageVelocity = averageVelocity.normalized * formationUnitMaxVelocity;
-		}
-		Vector3 averageVelocity3D = averageVelocity;
+
+		/*Vector3 averageVelocity3D = averageVelocity;
 		anchorPoint.position += offsetConstant * averageVelocity3D;
 
 
-
+	*/
 		if (Vector3.Distance(this.transform.position, path[currentIndex].transform.position) < .5f)
 		{
 			if (currentIndex < path.Length - 1)
@@ -230,6 +228,16 @@ public class Level2FormationSteering : MonoBehaviour {
 		}
 		position *= 1f / (float)(slotAssignments.Count);
 		return position;
+	}
+
+	public Vector2 getAverageVelocity(){
+		Vector2 velocity = Vector3.zero;
+		foreach (SlotAssignment slot in slotAssignments) {
+			Rigidbody2D rb = slot.character.GetComponent<Rigidbody2D> ();
+			velocity += rb.velocity;
+		}
+		velocity *= 1f / (float)(slotAssignments.Count);
+		return velocity;
 	}
 
 
