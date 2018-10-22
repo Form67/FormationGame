@@ -79,12 +79,15 @@ public class Level2FormationSteering : MonoBehaviour {
 
 	public float offsetConstant;
 
+	public float maxDistanceConstant;
+
 	int currentIndex;
 	bool completed;
 	Rigidbody2D rbody;
 	// Use this for initialization
 	void Start () {
 		pattern = new FormationPattern (characterRadius, numberOfSlots);
+		slotAssignments = new List<SlotAssignment> ();
 		for (int i = 0; i < numberOfSlots; i++) {
 			SlotAssignment slot = new SlotAssignment ();
 			slot.slotNumber = i;
@@ -134,14 +137,19 @@ public class Level2FormationSteering : MonoBehaviour {
 
 		}
 		averageVelocity *= 1f / (float)slotAssignments.Count;
+		if (averageVelocity.magnitude > formationUnitMaxVelocity) {
+			averageVelocity = averageVelocity.normalized * formationUnitMaxVelocity;
+		}
 		Vector3 averageVelocity3D = averageVelocity;
 		anchorPoint.position += offsetConstant * averageVelocity3D;
+
 
 
 		if (Vector3.Distance(this.transform.position, path[currentIndex].transform.position) < .5f)
 		{
 			if (currentIndex < path.Length - 1)
 			{
+				print (currentIndex);
 				currentIndex++;
 			}
 			else
@@ -152,16 +160,21 @@ public class Level2FormationSteering : MonoBehaviour {
 		}
 
 		if (!completed) {
-			Vector3 leadAcceleration = Pathfind (transform.position);
-			leadAcceleration += (transform.position - anchorPoint.position);
+			Vector2 leadAcceleration = Pathfind (transform.position);
+			//leadAcceleration += maxDistanceConstant * DynamicSeek (transform.position, anchorPoint.position, leadUnitMaxAcceleration);
 			if (leadAcceleration.magnitude > leadUnitMaxAcceleration) {
 				leadAcceleration = leadUnitMaxAcceleration * leadAcceleration.normalized;
 			}
-			Vector2 leadAcceleration2D = leadAcceleration;
-			rbody.velocity += leadAcceleration2D;
+
+			rbody.velocity += leadAcceleration;
 
 			if (rbody.velocity.magnitude > leadUnitMaxVelocity) {
 				rbody.velocity = leadUnitMaxVelocity * rbody.velocity.normalized;
+			}
+
+			if (Vector3.Distance (transform.position, getAverageUnitPosition()) > maxDistanceConstant) {
+				rbody.velocity *= 0.3f;
+
 			}
 		}
 
@@ -207,7 +220,16 @@ public class Level2FormationSteering : MonoBehaviour {
 	}
 
 	public Vector2 Pathfind(Vector3 position) {
-		return DynamicSeek(position, path[currentIndex].transform.position, leadUnitMaxAcceleration);
+		return DynamicSeek(position, path[currentIndex].transform.position,  leadUnitMaxAcceleration);
+	}
+
+	public Vector3 getAverageUnitPosition(){
+		Vector3 position = Vector3.zero;
+		foreach (SlotAssignment slot in slotAssignments) {
+			position += slot.character.transform.position;
+		}
+		position *= 1f / (float)(slotAssignments.Count);
+		return position;
 	}
 
 
