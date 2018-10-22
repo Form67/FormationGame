@@ -230,6 +230,14 @@ Prefab:
       propertyPath: m_RootOrder
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 4548307957120752, guid: 0ececb0729d9cdd4fa4648eb1d43a836, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: -2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4548307957120752, guid: 0ececb0729d9cdd4fa4648eb1d43a836, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: -5.17
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0ececb0729d9cdd4fa4648eb1d43a836, type: 2}
   m_IsPrefabAsset: 0
@@ -255,8 +263,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numberOfSlots: 12
-  characterRadius: 0.45
-  unitPrefab: {fileID: 1357473648025130, guid: 3d33f4589c8226d4aba70915807ae8ee, type: 2}
+  characterRadius: 0.2
+  unitPrefab: {fileID: 1014253524365902, guid: 91793a5d090d3414d9f343f2d9c80fae, type: 2}
   anchorOffset: 1.03
   timeToTarget: 0.72
   slowRadius: 0.52
@@ -272,13 +280,15 @@ MonoBehaviour:
   - {fileID: 1814933078}
   - {fileID: 377821582}
   coneCheckRadius: 1
-  leadUnitMaxVelocity: 1.31
-  leadUnitMaxAcceleration: 1.08
+  leadUnitMaxVelocity: 1.05
+  leadUnitMaxAcceleration: 0.96
   formationUnitMaxVelocity: 0.77
   formationUnitMaxAcceleration: 0.73
   offsetConstant: 0.57
   maxDistanceConstant: 1.68
-  coneCheckConstant: 4.97
+  followWeight: 0.24
+  formationWeight: 0.42
+  coneCheckConstant: 0.71
 --- !u!50 &512065289
 Rigidbody2D:
   serializedVersion: 4

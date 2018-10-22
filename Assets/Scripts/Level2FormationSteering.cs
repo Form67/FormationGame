@@ -18,7 +18,7 @@ public struct PositionOrientation{
 public class FormationPattern {
 
 	float characterRadius;
-	int numberOfSlots;
+	public int numberOfSlots;
 
 	public FormationPattern(float cR, int nOS){
 		characterRadius = cR;
@@ -81,11 +81,17 @@ public class Level2FormationSteering : MonoBehaviour {
 
 	public float maxDistanceConstant;
 
+	public float followWeight;
+	public float formationWeight;
 	public float coneCheckConstant;
 	GameObject[] walls;
 	int currentIndex;
 	bool completed;
 	Rigidbody2D rbody;
+
+	bool goingThroughTunnel;
+	int unitInTunnelIndex;
+	bool inTunnel;
 	// Use this for initialization
 	void Start () {
 		pattern = new FormationPattern (characterRadius, numberOfSlots);
@@ -108,40 +114,83 @@ public class Level2FormationSteering : MonoBehaviour {
 	void Update () {
 		Vector3 averageVelocity = getAverageVelocity();
 		Vector3 anchorPosition = offsetConstant * averageVelocity + getAverageUnitPosition ();
-		foreach (SlotAssignment slot in slotAssignments) {
-			Rigidbody2D rb = slot.character.GetComponent<Rigidbody2D> ();
 
-			Vector3 position = slot.character.transform.position;
-			Vector3 target = pattern.getSlotLocation (slot.slotNumber).position + anchorPosition;
-			Vector2 formationSeekAcceleration = DynamicSeek (position, target, formationUnitMaxAcceleration);
-			Vector2 formationArriveAcceleration = DynamicArrive (position, target, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
+		if (goingThroughTunnel) {
+			//print (unitInTunnelIndex + " " + path[3].transform.position);
+			SlotAssignment currentSlot = slotAssignments [unitInTunnelIndex];
+			Vector3 currentPosition = currentSlot.character.transform.position;
+			Rigidbody2D rb = currentSlot.character.GetComponent<Rigidbody2D> ();
+			rb.simulated = true;
+			if (!inTunnel) {
+				if (Vector3.Distance (currentPosition, path [2].transform.position) < 0.2f) {
+					inTunnel = true;
+					rb.velocity = Vector2.zero;
+				} else {
+					Vector2 arriveAcceleration = DynamicSeek (currentPosition, path [2].transform.position, formationUnitMaxAcceleration);
+					arriveAcceleration += DynamicArrive (currentPosition, path [2].transform.position, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
+					rb.velocity += arriveAcceleration;
+					if (rb.velocity.magnitude> formationUnitMaxVelocity) {
+						rb.velocity = rb.velocity.normalized * formationUnitMaxVelocity;
+					}
+				}
 
-			target = transform.position;
-
-			Vector2 targetSeekAcceleration = DynamicSeek (position, target, formationUnitMaxAcceleration);
-			Vector2 targetArriveAcceleration = DynamicArrive (position, target, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
-
-			Vector2 coneCheckAcceleration = coneCheckConstant * coneCheck(slot.character);
-
-
-			Vector2 acceleration = coneCheckAcceleration + formationSeekAcceleration + formationArriveAcceleration + targetSeekAcceleration + targetArriveAcceleration;
-
-			if (acceleration.magnitude > formationUnitMaxAcceleration) {
-				acceleration = formationUnitMaxAcceleration * acceleration.normalized;
 			}
+			if (inTunnel) {
+				if (Vector3.Distance (currentPosition, path [3].transform.position) < 0.2f) {
+					inTunnel = false;
+					rb.velocity = Vector2.zero;
+					rb.simulated = false;
+					unitInTunnelIndex++;
 
-			rb.velocity += acceleration;
-
-			if (rb.velocity.magnitude > formationUnitMaxVelocity) {
-				rb.velocity = formationUnitMaxVelocity * rb.velocity.normalized;
+					if (unitInTunnelIndex == slotAssignments.Count) {
+						goingThroughTunnel = false;
+						resetRigidBodies ();
+					}
+				} else {
+					Vector2 arriveAcceleration = DynamicSeek (currentPosition, path [3].transform.position, formationUnitMaxAcceleration);
+					rb.velocity += arriveAcceleration;
+					if (rb.velocity.magnitude > formationUnitMaxVelocity) {
+						rb.velocity = rb.velocity.normalized * formationUnitMaxVelocity;
+					}
+				}
 			}
-
 			float angle = Mathf.Rad2Deg * Mathf.Atan2 (-rb.velocity.x, rb.velocity.y);
+			
+			currentSlot.character.transform.eulerAngles = new Vector3 (0, 0, angle);
+			
+		} else {
+			foreach (SlotAssignment slot in slotAssignments) {
+				Rigidbody2D rb = slot.character.GetComponent<Rigidbody2D> ();
 
-			slot.character.transform.eulerAngles = new Vector3 (0, 0, angle);
+				Vector3 position = slot.character.transform.position;
+				Vector3 target = pattern.getSlotLocation (slot.slotNumber).position + anchorPosition;
+				Vector2 formationSeekAcceleration = formationWeight * DynamicSeek (position, target, formationUnitMaxAcceleration);
+				Vector2 formationArriveAcceleration = formationWeight * DynamicArrive (position, target, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
 
+				target = transform.position;
 
+				Vector2 targetSeekAcceleration = followWeight * DynamicSeek (position, target, formationUnitMaxAcceleration);
+				Vector2 targetArriveAcceleration = followWeight * DynamicArrive (position, target, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
 
+				Vector2 coneCheckAcceleration = coneCheckConstant * coneCheck (slot.character);
+
+				Vector2 acceleration = coneCheckAcceleration + formationSeekAcceleration + formationArriveAcceleration + targetSeekAcceleration + targetArriveAcceleration;
+
+				if (acceleration.magnitude > formationUnitMaxAcceleration) {
+					acceleration = formationUnitMaxAcceleration * acceleration.normalized;
+				}
+
+				rb.velocity += acceleration;
+
+				if (rb.velocity.magnitude > formationUnitMaxVelocity) {
+					rb.velocity = formationUnitMaxVelocity * rb.velocity.normalized;
+				}
+
+				float angle = Mathf.Rad2Deg * Mathf.Atan2 (-rb.velocity.x, rb.velocity.y);
+
+				slot.character.transform.eulerAngles = new Vector3 (0, 0, angle);
+
+			}
 		}
 
 	
@@ -149,8 +198,14 @@ public class Level2FormationSteering : MonoBehaviour {
 		{
 			if (currentIndex < path.Length - 1)
 			{
-				print (currentIndex);
+				
 				currentIndex++;
+				if (currentIndex == 3) {
+					goingThroughTunnel = true;
+					unitInTunnelIndex = 0;
+					setFormationStop ();
+					inTunnel = false;
+				}
 			}
 			else
 			{
@@ -159,9 +214,15 @@ public class Level2FormationSteering : MonoBehaviour {
 			}
 		}
 
-		if (!completed) {
+
+
+		if (currentIndex == 4 && goingThroughTunnel) {
+			rbody.velocity = new Vector2(0, 0);
+		}
+
+		else if (!completed) {
 			Vector2 leadAcceleration = Pathfind (transform.position);
-			//leadAcceleration += maxDistanceConstant * DynamicSeek (transform.position, anchorPoint.position, leadUnitMaxAcceleration);
+
 			if (leadAcceleration.magnitude > leadUnitMaxAcceleration) {
 				leadAcceleration = leadUnitMaxAcceleration * leadAcceleration.normalized;
 			}
@@ -201,26 +262,7 @@ public class Level2FormationSteering : MonoBehaviour {
 		Vector2 linearAcc = position - target;
 		return maxAcceleration * linearAcc.normalized;
 	}
-	/*
-	Vector2 ConeCheck(Vector3 position, Vector3 orientation){
-		Collider2D[] colliders = Physics2D.OverlapCircleAll(position, coneCheckRadius);
-		Vector3 characterToCollider;
-		float dot;
 
-		// Cone check
-		foreach (Collider2D collider in colliders)
-		{
-			characterToCollider = (collider.transform.position - position);
-			dot = Vector3.Dot(characterToCollider, position);
-			if (dot >= Mathf.Cos(100 * Mathf.Deg2Rad) && collider.tag != "boid")
-			{
-
-				return DynamicEvade(position, collider.transform.position, formationUnitMaxAcceleration);
-			}
-		}
-		return Vector2.zero;
-	}
-	*/
 	public Vector2 coneCheck(GameObject b)
 	{
 		GameObject smallestDistance = null;
@@ -281,6 +323,22 @@ public class Level2FormationSteering : MonoBehaviour {
 		return velocity;
 	}
 
+	void setFormationStop(){
+		foreach (SlotAssignment slot in slotAssignments) {
+			Rigidbody2D rb = slot.character.GetComponent<Rigidbody2D> ();
+			rb.velocity = Vector2.zero;
+			slot.character.transform.eulerAngles = Vector3.zero;
+			rb.simulated = false;
+		}
+	}
 
+	void resetRigidBodies(){
+		foreach (SlotAssignment slot in slotAssignments) {
+			Rigidbody2D rb = slot.character.GetComponent<Rigidbody2D> ();
+			rb.velocity = Vector2.zero;
+			slot.character.transform.eulerAngles = Vector3.zero;
+			rb.simulated = true;
+		}
+	}
 
 }
