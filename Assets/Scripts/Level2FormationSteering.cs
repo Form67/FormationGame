@@ -177,6 +177,7 @@ public class Level2FormationSteering : MonoBehaviour {
 
 			}
 			float leadAngle = Mathf.Rad2Deg * Mathf.Atan2 (-rbody.velocity.x, rbody.velocity.y);
+			transform.eulerAngles = new Vector3(0, 0, leadAngle);
 		}
 
 	}
