@@ -19,9 +19,9 @@ public class ScalableManager : MonoBehaviour {
     public float pathAcceptanceRange = 0.5f;
     public int currentIndex = 0;
 
-    [Header("Leader")]
+    [Header("Leader Reduce Speed")]
     public float maxDrift;
-    public float maxDistToUnits;
+    public float maxDistToFormationCenter;
     
     GameObject leader;
     List<GameObject> unitsInFormation;
@@ -59,10 +59,16 @@ public class ScalableManager : MonoBehaviour {
     protected void CheckLeaderSpeed()
     {
         float speedReduction = 1.0f;
-        float distToUnits = Vector3.Distance(leader.transform.position, centerVector);
 
-        if (distToUnits > maxDistToUnits)
-            speedReduction = maxDrift / distToUnits;
+        for (int i = 0; i < currentNumberOfUnits - 1; i++)
+        {
+            float distFromCenter = Vector3.Distance(unitsInFormation[i].transform.position, centerVector);
+            if (distFromCenter  - 0.1f > maxDistToFormationCenter)
+            {
+                speedReduction =  maxDrift / maxDistToFormationCenter;
+                break;
+            }
+        }
 
         leader.GetComponent<Rigidbody2D>().velocity = leader.GetComponent<Rigidbody2D>().velocity * speedReduction;
     }

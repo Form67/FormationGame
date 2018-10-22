@@ -331,6 +331,10 @@ Prefab:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1104675890226010, guid: db36baedbe3d7f846ae7a83e4a63af4f, type: 2}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: db36baedbe3d7f846ae7a83e4a63af4f, type: 2}
   m_IsPrefabAsset: 0
@@ -412,7 +416,7 @@ GameObject:
   m_Layer: 0
   m_Name: ScalableManager
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 2488908585195742037, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -444,8 +448,8 @@ MonoBehaviour:
   - {fileID: 1301962982}
   pathAcceptanceRange: 0.5
   currentIndex: 0
-  maxDrift: 0.4
-  maxDistToUnits: 0.5
+  maxDrift: 0.35
+  maxDistToFormationCenter: 0.76
 --- !u!4 &979239393
 Transform:
   m_ObjectHideFlags: 0

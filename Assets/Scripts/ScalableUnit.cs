@@ -72,8 +72,6 @@ public class ScalableUnit : Movement
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, radius);
         Vector2 forward = rb.velocity.normalized;
 
-        //Debug.DrawRay(transform.position, forward, Color.red);
-
         // Cone check
         foreach (Collider2D collider in colliders)
         {
