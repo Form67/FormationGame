@@ -17,7 +17,7 @@ public struct PositionOrientation{
 
 public class FormationPattern {
 
-	float characterRadius;
+	public float characterRadius;
 	public int numberOfSlots;
 
 	public FormationPattern(float cR, int nOS){
@@ -92,15 +92,19 @@ public class Level2FormationSteering : MonoBehaviour {
 	bool goingThroughTunnel;
 	int unitInTunnelIndex;
 	bool inTunnel;
+	List<bool> completedTunnel;
+	public float inTunnelConeCheckConstant;
 	// Use this for initialization
 	void Start () {
 		pattern = new FormationPattern (characterRadius, numberOfSlots);
 		slotAssignments = new List<SlotAssignment> ();
+		completedTunnel = new List<bool> ();
 		for (int i = 0; i < numberOfSlots; i++) {
 			SlotAssignment slot = new SlotAssignment ();
 			slot.slotNumber = i;
 			slot.character = Instantiate (unitPrefab);
 			slotAssignments.Add (slot);
+			completedTunnel.Add (false);
 		}
 		anchorPoint = pattern.getDriftOffset (slotAssignments);
 		currentIndex = 0;
@@ -112,15 +116,17 @@ public class Level2FormationSteering : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		CheckIfThereIsDestroyedUnit ();
 		Vector3 averageVelocity = getAverageVelocity();
 		Vector3 anchorPosition = offsetConstant * averageVelocity + getAverageUnitPosition ();
-
+		pattern.characterRadius = characterRadius;
 		if (goingThroughTunnel) {
-			//print (unitInTunnelIndex + " " + path[3].transform.position);
+			
+			setFormationStop();
 			SlotAssignment currentSlot = slotAssignments [unitInTunnelIndex];
 			Vector3 currentPosition = currentSlot.character.transform.position;
 			Rigidbody2D rb = currentSlot.character.GetComponent<Rigidbody2D> ();
-			rb.simulated = true;
+
 			if (!inTunnel) {
 				if (Vector3.Distance (currentPosition, path [2].transform.position) < 0.2f) {
 					inTunnel = true;
@@ -128,6 +134,10 @@ public class Level2FormationSteering : MonoBehaviour {
 				} else {
 					Vector2 arriveAcceleration = DynamicSeek (currentPosition, path [2].transform.position, formationUnitMaxAcceleration);
 					arriveAcceleration += DynamicArrive (currentPosition, path [2].transform.position, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
+					arriveAcceleration += inTunnelConeCheckConstant * coneCheck (currentSlot.character);
+					if (arriveAcceleration.magnitude > formationUnitMaxAcceleration) {
+						arriveAcceleration = arriveAcceleration.normalized * formationUnitMaxAcceleration;
+					}
 					rb.velocity += arriveAcceleration;
 					if (rb.velocity.magnitude> formationUnitMaxVelocity) {
 						rb.velocity = rb.velocity.normalized * formationUnitMaxVelocity;
@@ -139,16 +149,20 @@ public class Level2FormationSteering : MonoBehaviour {
 				if (Vector3.Distance (currentPosition, path [3].transform.position) < 0.2f) {
 					inTunnel = false;
 					rb.velocity = Vector2.zero;
-					rb.simulated = false;
-					unitInTunnelIndex++;
 
-					if (unitInTunnelIndex == slotAssignments.Count) {
+
+					completedTunnel [unitInTunnelIndex] = true;
+					unitInTunnelIndex = closestBoidIndexToStartOfTunnel();
+					if (unitInTunnelIndex == -1) {
 						goingThroughTunnel = false;
-						resetRigidBodies ();
+						characterRadius *= 2f;
+
 					}
 				} else {
 					Vector2 arriveAcceleration = DynamicSeek (currentPosition, path [3].transform.position, formationUnitMaxAcceleration);
+
 					rb.velocity += arriveAcceleration;
+
 					if (rb.velocity.magnitude > formationUnitMaxVelocity) {
 						rb.velocity = rb.velocity.normalized * formationUnitMaxVelocity;
 					}
@@ -202,7 +216,7 @@ public class Level2FormationSteering : MonoBehaviour {
 				currentIndex++;
 				if (currentIndex == 3) {
 					goingThroughTunnel = true;
-					unitInTunnelIndex = 0;
+					unitInTunnelIndex = closestBoidIndexToStartOfTunnel();
 					setFormationStop ();
 					inTunnel = false;
 				}
@@ -234,7 +248,7 @@ public class Level2FormationSteering : MonoBehaviour {
 			}
 
 			if (Vector3.Distance (transform.position, getAverageUnitPosition()) > maxDistanceConstant) {
-				rbody.velocity *= 0.3f;
+				rbody.velocity *= 1/Vector3.Distance (transform.position, getAverageUnitPosition());
 
 			}
 			float leadAngle = Mathf.Rad2Deg * Mathf.Atan2 (-rbody.velocity.x, rbody.velocity.y);
@@ -327,18 +341,47 @@ public class Level2FormationSteering : MonoBehaviour {
 		foreach (SlotAssignment slot in slotAssignments) {
 			Rigidbody2D rb = slot.character.GetComponent<Rigidbody2D> ();
 			rb.velocity = Vector2.zero;
+			rb.angularVelocity = 0;
 			slot.character.transform.eulerAngles = Vector3.zero;
-			rb.simulated = false;
 		}
 	}
 
-	void resetRigidBodies(){
-		foreach (SlotAssignment slot in slotAssignments) {
-			Rigidbody2D rb = slot.character.GetComponent<Rigidbody2D> ();
-			rb.velocity = Vector2.zero;
-			slot.character.transform.eulerAngles = Vector3.zero;
-			rb.simulated = true;
+
+
+	void CheckIfThereIsDestroyedUnit(){
+		for (int i = 0; i < slotAssignments.Count; i++) {
+			if (slotAssignments [i].character == null) {
+				slotAssignments.RemoveAt (i);
+				completedTunnel.RemoveAt (i);
+				pattern.numberOfSlots--;
+				if (inTunnel && unitInTunnelIndex == i) {
+					inTunnel = false;
+					unitInTunnelIndex = closestBoidIndexToStartOfTunnel ();
+					if (unitInTunnelIndex == -1) {
+						goingThroughTunnel = false;
+						characterRadius *= 2f;
+
+					}
+				} else if (unitInTunnelIndex > i) {
+					
+					unitInTunnelIndex--;
+				}
+				i--;
+			}
 		}
+	}
+
+	int closestBoidIndexToStartOfTunnel(){
+		int index = -1;
+		float closestDistance = float.MaxValue;
+		for (int i = 0; i < completedTunnel.Count; i++) {
+			if (Vector3.Distance (slotAssignments [i].character.transform.position, path [2].transform.position) < closestDistance &&
+				!completedTunnel[i]) {
+				closestDistance = Vector3.Distance (slotAssignments [i].character.transform.position, path [2].transform.position);
+				index = i;
+			}
+		}
+		return index;
 	}
 
 }

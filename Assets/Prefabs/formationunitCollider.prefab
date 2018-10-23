@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 212143563211765396}
   - component: {fileID: 50274391497141484}
   - component: {fileID: 58794638940601182}
+  - component: {fileID: 114062390479069758}
   m_Layer: 0
   m_Name: formationunitCollider
   m_TagString: boid
@@ -77,6 +78,17 @@ CircleCollider2D:
   m_Offset: {x: 0, y: -0.44}
   serializedVersion: 2
   m_Radius: 0.74
+--- !u!114 &114062390479069758
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1014253524365902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1525327976d0d8a4aa463f8ebb377900, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!212 &212143563211765396
 SpriteRenderer:
   m_ObjectHideFlags: 1
