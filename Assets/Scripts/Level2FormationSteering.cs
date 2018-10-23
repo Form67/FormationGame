@@ -17,8 +17,8 @@ public struct PositionOrientation{
 
 public class FormationPattern {
 
-	float characterRadius;
-	int numberOfSlots;
+	public float characterRadius;
+	public int numberOfSlots;
 
 	public FormationPattern(float cR, int nOS){
 		characterRadius = cR;
@@ -81,76 +81,145 @@ public class Level2FormationSteering : MonoBehaviour {
 
 	public float maxDistanceConstant;
 
+	public float followWeight;
+	public float formationWeight;
+	public float coneCheckConstant;
+	GameObject[] walls;
 	int currentIndex;
 	bool completed;
 	Rigidbody2D rbody;
+
+	bool goingThroughTunnel;
+	int unitInTunnelIndex;
+	bool inTunnel;
+	List<bool> completedTunnel;
+	public float inTunnelConeCheckConstant;
 	// Use this for initialization
 	void Start () {
 		pattern = new FormationPattern (characterRadius, numberOfSlots);
 		slotAssignments = new List<SlotAssignment> ();
+		completedTunnel = new List<bool> ();
 		for (int i = 0; i < numberOfSlots; i++) {
 			SlotAssignment slot = new SlotAssignment ();
 			slot.slotNumber = i;
 			slot.character = Instantiate (unitPrefab);
 			slotAssignments.Add (slot);
+			completedTunnel.Add (false);
 		}
 		anchorPoint = pattern.getDriftOffset (slotAssignments);
 		currentIndex = 0;
 		rbody = GetComponent<Rigidbody2D> ();
 		completed = false;
+		walls = GameObject.FindGameObjectsWithTag("Wall");
+
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		Vector2 averageVelocity = Vector2.zero;
-		foreach (SlotAssignment slot in slotAssignments) {
-			Rigidbody2D rb = slot.character.GetComponent<Rigidbody2D> ();
+		CheckIfThereIsDestroyedUnit ();
+		Vector3 averageVelocity = getAverageVelocity();
+		Vector3 anchorPosition = offsetConstant * averageVelocity + getAverageUnitPosition ();
+		pattern.characterRadius = characterRadius;
+		if (goingThroughTunnel) {
+			
+			setFormationStop();
+			SlotAssignment currentSlot = slotAssignments [unitInTunnelIndex];
+			Vector3 currentPosition = currentSlot.character.transform.position;
+			Rigidbody2D rb = currentSlot.character.GetComponent<Rigidbody2D> ();
 
-			Vector3 position = slot.character.transform.position;
-			Vector3 target = pattern.getSlotLocation (slot.slotNumber).position + anchorPoint.position;
-			Vector2 formationSeekAcceleration = DynamicSeek (position, target, formationUnitMaxAcceleration);
-			Vector2 formationArriveAcceleration = DynamicArrive (position, target, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
+			if (!inTunnel) {
+				if (Vector3.Distance (currentPosition, path [2].transform.position) < 0.2f) {
+					inTunnel = true;
+					rb.velocity = Vector2.zero;
+				} else {
+					Vector2 arriveAcceleration = DynamicSeek (currentPosition, path [2].transform.position, formationUnitMaxAcceleration);
+					arriveAcceleration += DynamicArrive (currentPosition, path [2].transform.position, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
+					arriveAcceleration += inTunnelConeCheckConstant * coneCheck (currentSlot.character);
+					if (arriveAcceleration.magnitude > formationUnitMaxAcceleration) {
+						arriveAcceleration = arriveAcceleration.normalized * formationUnitMaxAcceleration;
+					}
+					rb.velocity += arriveAcceleration;
+					if (rb.velocity.magnitude> formationUnitMaxVelocity) {
+						rb.velocity = rb.velocity.normalized * formationUnitMaxVelocity;
+					}
+				}
 
-			target = transform.position;
-
-			Vector2 targetSeekAcceleration = DynamicSeek (position, target, formationUnitMaxAcceleration);
-			Vector2 targetArriveAcceleration = DynamicArrive (position, target, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
-
-			Vector2 coneCheckAcceleration = ConeCheck (position, slot.character.transform.eulerAngles);
-
-
-			Vector2 acceleration = coneCheckAcceleration + formationSeekAcceleration + formationArriveAcceleration + targetSeekAcceleration + targetArriveAcceleration;
-
-			if (acceleration.magnitude > formationUnitMaxAcceleration) {
-				acceleration = formationUnitMaxAcceleration * acceleration.normalized;
 			}
+			if (inTunnel) {
+				if (Vector3.Distance (currentPosition, path [3].transform.position) < 0.2f) {
+					inTunnel = false;
+					rb.velocity = Vector2.zero;
 
-			rb.velocity += acceleration;
 
-			if (rb.velocity.magnitude > formationUnitMaxVelocity) {
-				rb.velocity = formationUnitMaxVelocity * rb.velocity.normalized;
+					completedTunnel [unitInTunnelIndex] = true;
+					unitInTunnelIndex = closestBoidIndexToStartOfTunnel();
+					if (unitInTunnelIndex == -1) {
+						goingThroughTunnel = false;
+						characterRadius *= 2f;
+
+					}
+				} else {
+					Vector2 arriveAcceleration = DynamicSeek (currentPosition, path [3].transform.position, formationUnitMaxAcceleration);
+
+					rb.velocity += arriveAcceleration;
+
+					if (rb.velocity.magnitude > formationUnitMaxVelocity) {
+						rb.velocity = rb.velocity.normalized * formationUnitMaxVelocity;
+					}
+				}
 			}
+			float angle = Mathf.Rad2Deg * Mathf.Atan2 (-rb.velocity.x, rb.velocity.y);
+			
+			currentSlot.character.transform.eulerAngles = new Vector3 (0, 0, angle);
+			
+		} else {
+			foreach (SlotAssignment slot in slotAssignments) {
+				Rigidbody2D rb = slot.character.GetComponent<Rigidbody2D> ();
 
+				Vector3 position = slot.character.transform.position;
+				Vector3 target = pattern.getSlotLocation (slot.slotNumber).position + anchorPosition;
+				Vector2 formationSeekAcceleration = formationWeight * DynamicSeek (position, target, formationUnitMaxAcceleration);
+				Vector2 formationArriveAcceleration = formationWeight * DynamicArrive (position, target, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
 
+				target = transform.position;
 
-			averageVelocity += rb.velocity;
+				Vector2 targetSeekAcceleration = followWeight * DynamicSeek (position, target, formationUnitMaxAcceleration);
+				Vector2 targetArriveAcceleration = followWeight * DynamicArrive (position, target, rb.velocity, formationUnitMaxVelocity, formationUnitMaxAcceleration);
 
+				Vector2 coneCheckAcceleration = coneCheckConstant * coneCheck (slot.character);
+
+				Vector2 acceleration = coneCheckAcceleration + formationSeekAcceleration + formationArriveAcceleration + targetSeekAcceleration + targetArriveAcceleration;
+
+				if (acceleration.magnitude > formationUnitMaxAcceleration) {
+					acceleration = formationUnitMaxAcceleration * acceleration.normalized;
+				}
+
+				rb.velocity += acceleration;
+
+				if (rb.velocity.magnitude > formationUnitMaxVelocity) {
+					rb.velocity = formationUnitMaxVelocity * rb.velocity.normalized;
+				}
+
+				float angle = Mathf.Rad2Deg * Mathf.Atan2 (-rb.velocity.x, rb.velocity.y);
+
+				slot.character.transform.eulerAngles = new Vector3 (0, 0, angle);
+
+			}
 		}
-		averageVelocity *= 1f / (float)slotAssignments.Count;
-		if (averageVelocity.magnitude > formationUnitMaxVelocity) {
-			averageVelocity = averageVelocity.normalized * formationUnitMaxVelocity;
-		}
-		Vector3 averageVelocity3D = averageVelocity;
-		anchorPoint.position += offsetConstant * averageVelocity3D;
 
-
-
+	
 		if (Vector3.Distance(this.transform.position, path[currentIndex].transform.position) < .5f)
 		{
 			if (currentIndex < path.Length - 1)
 			{
-				print (currentIndex);
+				
 				currentIndex++;
+				if (currentIndex == 3) {
+					goingThroughTunnel = true;
+					unitInTunnelIndex = closestBoidIndexToStartOfTunnel();
+					setFormationStop ();
+					inTunnel = false;
+				}
 			}
 			else
 			{
@@ -159,9 +228,15 @@ public class Level2FormationSteering : MonoBehaviour {
 			}
 		}
 
-		if (!completed) {
+
+
+		if (currentIndex == 4 && goingThroughTunnel) {
+			rbody.velocity = new Vector2(0, 0);
+		}
+
+		else if (!completed) {
 			Vector2 leadAcceleration = Pathfind (transform.position);
-			//leadAcceleration += maxDistanceConstant * DynamicSeek (transform.position, anchorPoint.position, leadUnitMaxAcceleration);
+
 			if (leadAcceleration.magnitude > leadUnitMaxAcceleration) {
 				leadAcceleration = leadUnitMaxAcceleration * leadAcceleration.normalized;
 			}
@@ -173,9 +248,11 @@ public class Level2FormationSteering : MonoBehaviour {
 			}
 
 			if (Vector3.Distance (transform.position, getAverageUnitPosition()) > maxDistanceConstant) {
-				rbody.velocity *= 0.3f;
+				rbody.velocity *= 1/Vector3.Distance (transform.position, getAverageUnitPosition());
 
 			}
+			float leadAngle = Mathf.Rad2Deg * Mathf.Atan2 (-rbody.velocity.x, rbody.velocity.y);
+			transform.eulerAngles = new Vector3(0, 0, leadAngle);
 		}
 
 	}
@@ -200,21 +277,39 @@ public class Level2FormationSteering : MonoBehaviour {
 		return maxAcceleration * linearAcc.normalized;
 	}
 
-	Vector2 ConeCheck(Vector3 position, Vector3 orientation){
-		Collider2D[] colliders = Physics2D.OverlapCircleAll(position, coneCheckRadius);
-		Vector3 characterToCollider;
-		float dot;
-
-		// Cone check
-		foreach (Collider2D collider in colliders)
+	public Vector2 coneCheck(GameObject b)
+	{
+		GameObject smallestDistance = null;
+		float smallestDistanceAmount = 10000;
+		Vector2 ourVelocity = b.GetComponent<Rigidbody2D>().velocity;
+		foreach (GameObject g in walls)
 		{
-			characterToCollider = (collider.transform.position - position);
-			dot = Vector3.Dot(characterToCollider, position);
-			if (dot >= Mathf.Cos(100 * Mathf.Deg2Rad) && collider.tag != "boid")
+			if (g != b)
 			{
-
-				return DynamicEvade(position, collider.transform.position, formationUnitMaxAcceleration);
+				if (Vector3.Distance(g.transform.position, b.transform.position) < coneCheckRadius)
+				{
+					if (Vector3.Angle(g.transform.position, b.transform.position) < 90)
+					{
+						if (Vector3.Distance(g.transform.position, b.transform.position) < smallestDistanceAmount)
+						{
+							smallestDistance = g;
+							smallestDistanceAmount = Vector3.Distance(g.transform.position, b.transform.position);
+							//Vector2 theirVelocity = g.GetComponent<Rigidbody2D>().velocity;
+						}
+					}
+				}
 			}
+
+		}
+		if (smallestDistance != null)
+		{
+
+			Vector3 ourVelocity3D = ourVelocity;
+			Vector3 predictedPosition = b.transform.position + smallestDistanceAmount * ourVelocity3D;
+			// Vector3 theirVelocity3D = smallestDistance.GetComponent<Rigidbody2D>().velocity;
+			Vector3 targetPredictedPosition = smallestDistance.transform.position; //smallestDistanceAmount * theirVelocity3D;
+			//print(DynamicEvade(predictedPosition, targetPredictedPosition));
+			return DynamicEvade(predictedPosition, targetPredictedPosition, formationUnitMaxAcceleration);
 		}
 		return Vector2.zero;
 	}
@@ -232,6 +327,61 @@ public class Level2FormationSteering : MonoBehaviour {
 		return position;
 	}
 
+	public Vector2 getAverageVelocity(){
+		Vector2 velocity = Vector3.zero;
+		foreach (SlotAssignment slot in slotAssignments) {
+			Rigidbody2D rb = slot.character.GetComponent<Rigidbody2D> ();
+			velocity += rb.velocity;
+		}
+		velocity *= 1f / (float)(slotAssignments.Count);
+		return velocity;
+	}
 
+	void setFormationStop(){
+		foreach (SlotAssignment slot in slotAssignments) {
+			Rigidbody2D rb = slot.character.GetComponent<Rigidbody2D> ();
+			rb.velocity = Vector2.zero;
+			rb.angularVelocity = 0;
+			slot.character.transform.eulerAngles = Vector3.zero;
+		}
+	}
+
+
+
+	void CheckIfThereIsDestroyedUnit(){
+		for (int i = 0; i < slotAssignments.Count; i++) {
+			if (slotAssignments [i].character == null) {
+				slotAssignments.RemoveAt (i);
+				completedTunnel.RemoveAt (i);
+				pattern.numberOfSlots--;
+				if (inTunnel && unitInTunnelIndex == i) {
+					inTunnel = false;
+					unitInTunnelIndex = closestBoidIndexToStartOfTunnel ();
+					if (unitInTunnelIndex == -1) {
+						goingThroughTunnel = false;
+						characterRadius *= 2f;
+
+					}
+				} else if (unitInTunnelIndex > i) {
+					
+					unitInTunnelIndex--;
+				}
+				i--;
+			}
+		}
+	}
+
+	int closestBoidIndexToStartOfTunnel(){
+		int index = -1;
+		float closestDistance = float.MaxValue;
+		for (int i = 0; i < completedTunnel.Count; i++) {
+			if (Vector3.Distance (slotAssignments [i].character.transform.position, path [2].transform.position) < closestDistance &&
+				!completedTunnel[i]) {
+				closestDistance = Vector3.Distance (slotAssignments [i].character.transform.position, path [2].transform.position);
+				index = i;
+			}
+		}
+		return index;
+	}
 
 }
